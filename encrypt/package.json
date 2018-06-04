@@ -1,0 +1,15 @@
+{
+  "name": "syncApp",
+  "version": "0.0.6",
+  "description": "Syncronisation app...",
+  "scripts": {
+    "monitor": "./node_modules/nodemon/bin/nodemon.js encrypt.js"
+  },
+  "author": "vnl2k",
+  "dependencies": {
+    "nodemon": "^1"
+  },
+  "engines": {
+    "node": "^9"
+  }
+}

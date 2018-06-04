@@ -1,0 +1,8 @@
+{
+	"ignore": ["error-log.txt"],
+  "ext": "md odt docx pptx zip",
+  "script": "start.js",
+	"watch": [
+		"./"
+  ]
+}
