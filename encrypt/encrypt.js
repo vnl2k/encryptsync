@@ -16,7 +16,7 @@ function logMessage(message) {
 } 
 
 if (EMAIL == undefined) {
-	console.log("Please provide recepient email, e.g.\n sudo npm run monjs john.smith@mail.com")
+	console.log("Please provide recepient email, e.g.\n npm run monitor john.smith@mail.com")
 	process.exit()
 }
 
