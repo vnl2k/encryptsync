@@ -6,12 +6,13 @@
 image: node:9.11.1-alpine
 
 pipelines:
-  default:
-    - step:
-        caches:
-          - node
-        script: # Modify the commands below to build your repository.
-          - cd encrypt
-          - npm install --production
-          # - npm run monitor
-          # - npm test
+  branches:
+    master:
+      - step:
+          caches:
+            - node
+          script: # Modify the commands below to build your repository.
+            - cd encrypt
+            - npm install
+            - npm run monitor
+            # - npm test
