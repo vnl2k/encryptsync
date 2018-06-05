@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "# Please include a useful commit message!" 
+npm --prefix /encrypt run prettier

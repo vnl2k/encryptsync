@@ -5,7 +5,7 @@ const fs = require("fs"),
   nodemon = require("nodemon"),
   EMAIL = process.argv[2],
   DESTINATION_PATH = process.argv[3] || process.env.HOME + "/Dropbox",
-  CWD = process.cwd();
+  CWD = process.cwd()
 
 const ERROR_LOG = "error-log.txt";
 
