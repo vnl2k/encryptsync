@@ -1,18 +1,24 @@
 {
   "name": "syncApp",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Syncronisation app...",
   "scripts": {
-    "monitor": "./node_modules/nodemon/bin/nodemon.js encrypt.js"
+    "monitor": "./node_modules/nodemon/bin/nodemon.js encrypt.js",
+    "prettier": "./node_modules/.bin/prettier --loglevel error --use-tabs false --write \"**/*.js\"",
+    "lint": "./node_modules/.bin/eslint --config ../.eslintrc.js  \"**/*.js\""
   },
-  "repository" : { 
-    "type" : "git",
-    "url" : "https://bitbucket.org/vnl2k/encryptsync"
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/vnl2k/encryptsync"
   },
-  "license" : "LGPL-3.0-only",
+  "license": "LGPL-3.0-only",
   "author": "vnl2k",
   "dependencies": {
     "nodemon": "^1"
+  },
+  "devDependencies": {
+    "eslint": "^4",
+    "prettier": "^1"
   },
   "engines": {
     "node": "^9"
