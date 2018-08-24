@@ -1,6 +1,6 @@
 {
   "name": "syncApp",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Syncronisation app...",
   "scripts": {
     "monitor": "./node_modules/nodemon/bin/nodemon.js encrypt.js",

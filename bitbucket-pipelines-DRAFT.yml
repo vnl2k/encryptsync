@@ -14,5 +14,5 @@ pipelines:
           script: # Modify the commands below to build your repository.
             - cd encrypt
             - npm install
-            - npm run monitor
+            # - npm run monitor
             # - npm test
