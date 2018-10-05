@@ -1,5 +1,9 @@
 "use strict";
 
+// Run the ahole app:
+// npm run monitor test@example.com ./tests/source ./tests/target
+
+
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),

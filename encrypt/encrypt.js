@@ -82,15 +82,13 @@ module.exports = {
   logMessage: logMessage,
   monitor: (email, source_path, target_path) => {
 
-    let GPG,
-      conf = JSON.parse(fs.readFileSync("./nodemon.json"));
-
+    let GPG;
+    
     source_path = Path.resolve(source_path);
     target_path = Path.resolve(target_path);
-    conf.watch = [source_path];
 
     // This call to nodemon initialises nodemon within the script
-    nodemon({})
+    nodemon(JSON.parse(fs.readFileSync("nodemon.json")))
       .on("start", () => {
         GPG = initGPG(email);
       })

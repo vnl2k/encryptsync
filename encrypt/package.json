@@ -1,6 +1,6 @@
 {
   "name": "syncApp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Syncronisation app...",
   "scripts": {
     "monitor": "node start.js",
