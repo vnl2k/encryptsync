@@ -1,11 +1,11 @@
 {
   "name": "syncApp",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Syncronisation app...",
   "scripts": {
-    "monitor": "./node_modules/nodemon/bin/nodemon.js encrypt.js",
-    "prettier": "./node_modules/.bin/prettier --loglevel error --use-tabs false --write \"**/*.js\"",
-    "lint": "./node_modules/.bin/eslint --config ../.eslintrc.js  \"**/*.js\""
+    "monitor": "node start.js",
+    "prettier": "prettier --loglevel error --use-tabs false --write \"**/*.js\"",
+    "tests": "mocha $(find tests -name '*.js')"
   },
   "repository": {
     "type": "git",
@@ -14,13 +14,14 @@
   "license": "LGPL-3.0-only",
   "author": "vnl2k",
   "dependencies": {
-    "nodemon": "^1"
+    "nodemon": "^1.18.4"
   },
   "devDependencies": {
-    "eslint": "^4",
-    "prettier": "^1"
+    "eslint": "^5.6.1",
+    "mocha": "^5.2.0",
+    "prettier": "^1.14.3"
   },
   "engines": {
-    "node": "^9"
+    "node": "^10"
   }
 }
