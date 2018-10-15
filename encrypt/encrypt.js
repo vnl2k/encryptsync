@@ -3,19 +3,18 @@
 const fs = require("fs"),
   { spawn } = require("child_process"),
   nodemon = require("nodemon"),
-  Path = require("path"),
-  ERROR_LOG = "error-log.txt";
+  Path = require("path");
 
-function logMessage(message) {
+const logMessage = log_path => message => {
   fs.appendFile(
-    ERROR_LOG,
+    log_path,
     ["[", Date(), "] ", message, "\n"].join(""),
     "utf8",
     err => {
       if (err) throw err;
     }
   );
-}
+};
 
 function initGPG(email) {
   let gpg = spawn("gpg", ["-e", "-r", email, "--multifile"]);
@@ -30,7 +29,7 @@ function initGPG(email) {
   return gpg;
 }
 
-function encryptFiles(gpg, files, source_path, target_path, callback) {
+function encryptFiles(gpg, files, source_path, target_path, logger, callback) {
   gpg.on("exit", (code, signal) => {
     let fLen = files.length;
     let count = [];
@@ -50,19 +49,19 @@ function encryptFiles(gpg, files, source_path, target_path, callback) {
         fs.stat(file_name, (err, stats) => {
           if (err) {
             callbackCheck(target_file);
-            return logMessage(err);
+            return logger(err);
           }
 
           if (stats !== undefined && stats.isFile()) {
             fs.copyFile(file_name, target_file, err => {
               if (err) {
                 callbackCheck(target_file);
-                return logMessage(err);
+                return logger(err);
               }
 
               fs.unlink(file_name, err => {
-                if (err) logMessage(err);
-                console.log(`moving: ${relative_path}\n`);
+                if (err) logger(err);
+                console.log(`[${Date()}] moving: ${relative_path}\n`);
                 callbackCheck(target_file);
               });
             });
@@ -80,20 +79,26 @@ module.exports = {
   encryptFiles: encryptFiles,
   initGPG: initGPG,
   logMessage: logMessage,
-  monitor: (email, source_path, target_path) => {
+  monitor: (email, config_json_path) => {
 
-    let GPG;
-    
-    source_path = Path.resolve(source_path);
-    target_path = Path.resolve(target_path);
+    let GPG, config = JSON.parse(fs.readFileSync(config_json_path)),
+      source_path = Path.resolve(config.source_path),
+      target_path = Path.resolve(config.target_path),
+      error_log_path = Path.join(Path.dirname(config_json_path), "error.log"),
+      logger = logMessage(error_log_path);
 
+    // nodemon looks for "watch" key in the config object
+    config.watch = [source_path];
+    config.script = Path.resolve("./encrypt.js");
     // This call to nodemon initialises nodemon within the script
-    nodemon(JSON.parse(fs.readFileSync("nodemon.json")))
+
+    console.log("Starting encrypt monitor...")
+    nodemon(config)
       .on("start", () => {
         GPG = initGPG(email);
       })
       .on("restart", files => {
-        encryptFiles(GPG, files, source_path, target_path);
+        encryptFiles(GPG, files, source_path, target_path, logger);
       })
       .on("quit", function() {
         console.log("App has quit");
