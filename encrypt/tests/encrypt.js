@@ -31,6 +31,7 @@ describe("Testing sync-app", function() {
       FILES.slice(0, 1),
       SUORCE_PATH,
       TARGET_PATH,
+      (message) => {},
       encrypted_files => {
         fs.stat(encrypted_files[0], (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
@@ -48,6 +49,7 @@ describe("Testing sync-app", function() {
       FILES.slice(0, 2),
       SUORCE_PATH,
       TARGET_PATH,
+      (message) => {},
       encrypted_files => {
         assert.equal(
           encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
@@ -66,6 +68,7 @@ describe("Testing sync-app", function() {
       FILES.slice(0, 4),
       SUORCE_PATH,
       TARGET_PATH,
+      (message) => {},
       encrypted_files => {
         assert.equal(
           encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
@@ -84,6 +87,7 @@ describe("Testing sync-app", function() {
   //     FILES.slice(4),
   //     SUORCE_PATH,
   //     TARGET_PATH,
+        // (message) => {},
   //     encrypted_files => {
   //       fs.stat(encrypted_files[0], (err, stats) => {
   //         if (stats !== undefined) assert.equal(stats.isFile(), true);

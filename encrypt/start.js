@@ -2,8 +2,7 @@
 
 const { monitor } = require("./encrypt.js"),
   EMAIL = process.argv[2],
-  DESTINATION_PATH = process.argv[4] || process.env.HOME + "/Dropbox",
-  SOURCE_PATH = process.argv[3] || process.cwd();
+  CONFIG_PATH = process.argv[3];
 
 if (EMAIL == undefined) {
   console.log(
@@ -12,4 +11,4 @@ if (EMAIL == undefined) {
   process.exit(1);
 }
 
-monitor(EMAIL, SOURCE_PATH, DESTINATION_PATH);
+monitor(EMAIL, CONFIG_PATH);

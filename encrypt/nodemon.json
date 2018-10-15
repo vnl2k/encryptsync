@@ -1,8 +1,6 @@
 {
-	"ignore": ["error-log.txt"],
+	"ignore": ["error.log"],
   "ext": "txt md odt docx pptx zip pdf",
-  "script": "encrypt.js",
-	"watch": [
-		"./"
-  ]
+	"source_path": "path/to/source/folder",
+  "target_path": "path/to/target/folder"
 }
