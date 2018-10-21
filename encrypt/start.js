@@ -1,14 +1,13 @@
 "use strict";
 
 const { monitor } = require("./encrypt.js"),
-  EMAIL = process.argv[2],
-  CONFIG_PATH = process.argv[3];
+  CONFIG_PATH = process.argv[2];
 
-if (EMAIL == undefined) {
+if (CONFIG_PATH == undefined) {
   console.log(
-    "Please provide recepient email, e.g.\n sudo npm run monitor john.smith@mail.com"
+    "Please provide a config file."
   );
   process.exit(1);
 }
 
-monitor(EMAIL, CONFIG_PATH);
+monitor(CONFIG_PATH);
