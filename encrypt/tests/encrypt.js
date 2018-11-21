@@ -7,9 +7,9 @@
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles, initGPG, logMessage } = require("../encrypt.js");
+  { encryptFiles } = require("../encrypt.js");
 
-const SUORCE_PATH = Path.resolve("./tests/source"),
+const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
   resolver = name => Path.resolve("./tests/source/" + name),
   FILES = [
@@ -18,18 +18,18 @@ const SUORCE_PATH = Path.resolve("./tests/source"),
     resolver("c.txt"),
     resolver("d.doc"),
     resolver("new-folder/a.doc")
-  ];
+  ],
+  PUBLIC_KEY = fs.readFileSync("./tests/website.cert", "utf8");
 
 // The account password is "test
 
 describe("Testing sync-app", function() {
   it("should encrypt a single file", function(done) {
-    let gpg = initGPG("test@example.com");
 
     encryptFiles(
-      gpg,
       FILES.slice(0, 1),
-      SUORCE_PATH,
+      PUBLIC_KEY,
+      SOURCE_PATH,
       TARGET_PATH,
       (message) => {},
       encrypted_files => {
@@ -42,12 +42,11 @@ describe("Testing sync-app", function() {
   });
 
   it("should encrypt two files", function(done) {
-    let gpg = initGPG("test@example.com");
 
     encryptFiles(
-      gpg,
       FILES.slice(0, 2),
-      SUORCE_PATH,
+      PUBLIC_KEY,
+      SOURCE_PATH,
       TARGET_PATH,
       (message) => {},
       encrypted_files => {
@@ -61,12 +60,11 @@ describe("Testing sync-app", function() {
   });
 
   it("should encrypt four files", function(done) {
-    let gpg = initGPG("test@example.com");
 
     encryptFiles(
-      gpg,
       FILES.slice(0, 4),
-      SUORCE_PATH,
+      PUBLIC_KEY,
+      SOURCE_PATH,
       TARGET_PATH,
       (message) => {},
       encrypted_files => {
@@ -79,21 +77,20 @@ describe("Testing sync-app", function() {
     );
   });
 
-  // it("should encrypt a single file in new-folder", function(done) {
-  //   let gpg = initGPG("test@example.com");
+  it("should encrypt a single file in new-folder", function(done) {
 
-  //   encryptFiles(
-  //     gpg,
-  //     FILES.slice(4),
-  //     SUORCE_PATH,
-  //     TARGET_PATH,
-        // (message) => {},
-  //     encrypted_files => {
-  //       fs.stat(encrypted_files[0], (err, stats) => {
-  //         if (stats !== undefined) assert.equal(stats.isFile(), true);
-  //         done();
-  //       });
-  //     }
-  //   );
-  // });
+    encryptFiles(
+      FILES.slice(4),
+      PUBLIC_KEY,
+      SOURCE_PATH,
+      TARGET_PATH,
+      (message) => {},
+      encrypted_files => {
+        fs.stat(encrypted_files[0], (err, stats) => {
+          if (stats !== undefined) assert.equal(stats.isFile(), true);
+          done();
+        });
+      }
+    );
+  });
 });

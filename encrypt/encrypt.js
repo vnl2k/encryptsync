@@ -26,11 +26,10 @@ function encryptFiles(files, publicKey, source_path, target_path, logger, callba
     }
   };
 
-  if (fLen > 0)
+  if (Path.isAbsolute(source_path) === true && Path.isAbsolute(target_path) === true && fLen > 0)
     files.forEach(f => {
-      let file_name = f + ".enc";
-      let target_file = file_name.replace(source_path, target_path);
-      let relative_path = file_name.replace(source_path, "");
+      let target_file = f.replace(source_path, target_path) + ".rsaencrypt";
+      let relative_path = f.replace(source_path, "");
 
       // check the file exists
       fs.stat(f, (err, stats) => {
@@ -43,24 +42,23 @@ function encryptFiles(files, publicKey, source_path, target_path, logger, callba
           var file_buffer = fs.readFileSync(f);
           let encrypted = crypto.publicEncrypt(publicKey, file_buffer);
           
-          fs.writeFileSync(file_name, encrypted);
-          
-          fs.copyFile(file_name, target_file, err => {
+          fs.writeFile(target_file, encrypted, err => {
             if (err) {
               callbackCheck(target_file);
               return logger(err);
             }
 
-            fs.unlink(file_name, err => {
-              if (err) logger(err);
-              console.log(`[${Date()}] moving: ${relative_path}\n`);
-              callbackCheck(target_file);
-            });
+            console.log(`[${Date()}] encrypted: ${relative_path}\n`);
+            callbackCheck(target_file);
           });
         }
       });
     });
+  else {
+    console.log(`[${Date()}] no files were encrypted. Bad inputs!\n`);
+  }
 }
+
 
 module.exports = {
   encryptFiles: encryptFiles,

@@ -1,3 +1,5 @@
 **/node_modules
 **/target
 *.asc
+*.rsaencrypt
+*.cert
