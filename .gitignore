@@ -3,3 +3,4 @@
 *.asc
 *.rsaencrypt
 *.cert
+*.pem

@@ -3,7 +3,6 @@
 // Run the ahole app:
 // npm run monitor test@example.com ./tests/source ./tests/target
 
-
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
@@ -19,19 +18,25 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
     resolver("d.doc"),
     resolver("new-folder/a.doc")
   ],
-  PUBLIC_KEY = fs.readFileSync("./tests/website.cert", "utf8");
+  PUBLIC_KEY = fs.readFileSync("./tests/publickey.pem", "utf8");
+/*
+  KEY GENERATION
+    # generate private key
+    # https://www.openssl.org/docs/manmaster/man1/genpkey.html
+    openssl genpkey -algorithm RSA -out securekey.pem -pkeyopt rsa_keygen_bits:1024 -pass pass:XXX
+    openssl rsa -in securekey.pem -outform PEM -pubout -out publickey.pem
+   */
 
 // The account password is "test
 
 describe("Testing sync-app", function() {
   it("should encrypt a single file", function(done) {
-
     encryptFiles(
       FILES.slice(0, 1),
       PUBLIC_KEY,
       SOURCE_PATH,
       TARGET_PATH,
-      (message) => {},
+      message => {},
       encrypted_files => {
         fs.stat(encrypted_files[0], (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
@@ -42,13 +47,12 @@ describe("Testing sync-app", function() {
   });
 
   it("should encrypt two files", function(done) {
-
     encryptFiles(
       FILES.slice(0, 2),
       PUBLIC_KEY,
       SOURCE_PATH,
       TARGET_PATH,
-      (message) => {},
+      message => {},
       encrypted_files => {
         assert.equal(
           encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
@@ -60,13 +64,12 @@ describe("Testing sync-app", function() {
   });
 
   it("should encrypt four files", function(done) {
-
     encryptFiles(
       FILES.slice(0, 4),
       PUBLIC_KEY,
       SOURCE_PATH,
       TARGET_PATH,
-      (message) => {},
+      message => {},
       encrypted_files => {
         assert.equal(
           encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
@@ -78,19 +81,35 @@ describe("Testing sync-app", function() {
   });
 
   it("should encrypt a single file in new-folder", function(done) {
-
     encryptFiles(
       FILES.slice(4),
       PUBLIC_KEY,
       SOURCE_PATH,
       TARGET_PATH,
-      (message) => {},
+      message => {},
       encrypted_files => {
         fs.stat(encrypted_files[0], (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
       }
+    );
+  });
+
+  it("should encrypt a single file in new-folder AND encrypt the file name", function(done) {
+    encryptFiles(
+      FILES.slice(4),
+      PUBLIC_KEY,
+      SOURCE_PATH,
+      TARGET_PATH,
+      message => {},
+      encrypted_files => {
+        fs.stat(encrypted_files[0], (err, stats) => {
+          if (stats !== undefined) assert.equal(stats.isFile(), true);
+          done();
+        });
+      },
+      true
     );
   });
 });
