@@ -1,6 +1,6 @@
 {
   "name": "syncApp",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "The app monitors a folder for changes and encrypts with GPG chnaged files before moving them to the target folder.",
   "scripts": {
     "prettier": "prettier --loglevel error --use-tabs false --write \"**/*.js\"",

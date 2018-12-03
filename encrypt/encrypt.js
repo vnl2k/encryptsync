@@ -26,17 +26,13 @@ function RSAencryption(options) {
 }
 
 function GPGencryption(options, logger) {
-  const gpg = spawn(
-    "gpg",
-    ["-e", "-r", options.email, "--output", "-"],
-    {
-      stdio: [
-        "pipe", // Pipe child's stdin to pipe
-        "pipe", // Pipe child's stdout to pipe
-        "pipe"  // Direct child's stderr to pipe
-      ]
-    }
-  );
+  const gpg = spawn("gpg", ["-e", "-r", options.email, "--output", "-"], {
+    stdio: [
+      "pipe", // Pipe child's stdin to pipe
+      "pipe", // Pipe child's stdout to pipe
+      "pipe" // Direct child's stderr to pipe
+    ]
+  });
 
   gpg.stderr.on("message", message => logger(`GPG stderr: ${message}`));
   gpg.on("error", message => logger(`GPG error: ${message}`));
@@ -53,13 +49,11 @@ function GPGencryption(options, logger) {
     //     callback(data);
     //   }
     // });
-    
 
     // OR pipe stringht to a file
     //const writable = fs.createWriteStream('file.txt');
     // // All the data from readable goes into 'file.txt'
     // readable.pipe(writable);
-
   };
 }
 
@@ -83,14 +77,14 @@ function encryptFiles(
 
   let encryptor;
   switch (encryptor_options.method) {
-    case 'gpg':
+    case "gpg":
       encryptor = GPGencryption(encryptor_options, logger);
       break;
 
-    case 'none':
+    case "none":
     default:
       encryptor = RSAencryption(encryptor_options);
-  } 
+  }
 
   if (
     Path.isAbsolute(source_path) === true &&
@@ -104,13 +98,13 @@ function encryptFiles(
       if (scrambleNames === true) {
         const fileName = Path.basename(f),
           filePath = Path.dirname(f),
-          sha256 = Crypto.createHash('sha256');
+          sha256 = Crypto.createHash("sha256");
 
         sha256.update(fileName);
 
         target_file = Path.resolve(
           filePath.replace(source_path, target_path),
-          sha256.digest('hex') + ".gpg"
+          sha256.digest("hex") + ".gpg"
         );
       } else {
         target_file = f.replace(source_path, target_path) + ".gpg";
@@ -145,7 +139,7 @@ function encryptFiles(
 
 module.exports = {
   encryptFiles: encryptFiles,
-  
+
   logMessage: logMessage,
 
   RSAencryption: RSAencryption,
@@ -162,12 +156,11 @@ module.exports = {
     // nodemon looks for "watch" key in the config object
     config.watch = [source_path];
     config.script = Path.resolve("./encrypt.js");
-  
+
     console.log("Starting encrypt monitor...");
     nodemon(config)
       .on("start", () => {})
       .on("restart", files => {
-        
         encryptFiles(files, config.options, source_path, target_path, logger);
       })
       .on("quit", function() {

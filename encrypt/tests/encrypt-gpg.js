@@ -6,8 +6,7 @@
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles} = require("../encrypt.js");
-
+  { encryptFiles } = require("../encrypt.js");
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
@@ -29,7 +28,7 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
 
 // The account password is "test
 
-const GPGencryptor = () => ({email: "test@example.com", method: 'gpg'});
+const GPGencryptor = () => ({ email: "test@example.com", method: "gpg" });
 
 describe("Testing encryption with GPG", function() {
   it("should encrypt a single file", function(done) {
@@ -109,7 +108,7 @@ describe("Testing encryption with GPG", function() {
         fs.stat(encrypted_files[0], (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
-          process.exit(0)
+          process.exit(0);
         });
       },
       true

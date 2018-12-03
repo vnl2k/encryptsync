@@ -6,8 +6,7 @@
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles} = require("../encrypt.js");
-
+  { encryptFiles } = require("../encrypt.js");
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
@@ -29,7 +28,7 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
 
 // The account password is "test
 
-const RSAencryptor = () => ({public_key: "./tests/publickey.pem"});
+const RSAencryptor = () => ({ public_key: "./tests/publickey.pem" });
 
 describe("Testing encryption with RSA", function() {
   it("should encrypt a single file", function(done) {
