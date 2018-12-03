@@ -6,7 +6,8 @@
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles } = require("../encrypt.js");
+  { encryptFiles} = require("../encrypt.js");
+
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
@@ -17,8 +18,7 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
     resolver("c.txt"),
     resolver("d.doc"),
     resolver("new-folder/a.doc")
-  ],
-  PUBLIC_KEY = fs.readFileSync("./tests/publickey.pem", "utf8");
+  ];
 /*
   KEY GENERATION
     # generate private key
@@ -29,11 +29,13 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
 
 // The account password is "test
 
-describe("Testing sync-app", function() {
+const RSAencryptor = () => ({public_key: "./tests/publickey.pem"});
+
+describe("Testing encryption with RSA", function() {
   it("should encrypt a single file", function(done) {
     encryptFiles(
       FILES.slice(0, 1),
-      PUBLIC_KEY,
+      RSAencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
       message => {},
@@ -49,7 +51,7 @@ describe("Testing sync-app", function() {
   it("should encrypt two files", function(done) {
     encryptFiles(
       FILES.slice(0, 2),
-      PUBLIC_KEY,
+      RSAencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
       message => {},
@@ -66,7 +68,7 @@ describe("Testing sync-app", function() {
   it("should encrypt four files", function(done) {
     encryptFiles(
       FILES.slice(0, 4),
-      PUBLIC_KEY,
+      RSAencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
       message => {},
@@ -83,7 +85,7 @@ describe("Testing sync-app", function() {
   it("should encrypt a single file in new-folder", function(done) {
     encryptFiles(
       FILES.slice(4),
-      PUBLIC_KEY,
+      RSAencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
       message => {},
@@ -99,7 +101,7 @@ describe("Testing sync-app", function() {
   it("should encrypt a single file in new-folder AND encrypt the file name", function(done) {
     encryptFiles(
       FILES.slice(4),
-      PUBLIC_KEY,
+      RSAencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
       message => {},

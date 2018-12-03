@@ -1,7 +1,0 @@
-{
-	"ignore": ["error.log"],
-  "ext": "txt md odt docx pptx zip pdf",
-	"source_path": "./tests/source",
-  "target_path": "./tests/target",
-  "public_key": "./pub_key.asc"
-}

@@ -3,5 +3,9 @@
   "ext": "txt md odt docx pptx zip pdf",
 	"source_path": "path/to/source/folder",
   "target_path": "path/to/target/folder",
-  "public_key": "path/to/public_key.file"
+  "options": {
+  	"public_key": "path/to/public_key.file",
+  	"email" : "test@example.com",
+  	"mehotd": "gpg | none "
+  }
 }
