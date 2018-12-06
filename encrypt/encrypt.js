@@ -63,7 +63,7 @@ function encryptFiles(
   source_path,
   target_path,
   logger,
-  callback,
+  callback, // used for testing purposes at the moment
   scrambleNames = false
 ) {
   const fLen = files.length,
@@ -75,15 +75,18 @@ function encryptFiles(
       }
     };
 
-  let encryptor;
+  let encryptor,
+    enc_ext;
   switch (encryptor_options.method) {
     case "gpg":
       encryptor = GPGencryption(encryptor_options, logger);
+      enc_ext = ".gpg";
       break;
 
     case "none":
     default:
       encryptor = RSAencryption(encryptor_options);
+      enc_ext = ".rsa";
   }
 
   if (
@@ -104,10 +107,10 @@ function encryptFiles(
 
         target_file = Path.resolve(
           filePath.replace(source_path, target_path),
-          sha256.digest("hex") + ".gpg"
+          sha256.digest("hex") + enc_ext
         );
       } else {
-        target_file = f.replace(source_path, target_path) + ".gpg";
+        target_file = f.replace(source_path, target_path) + enc_ext;
       }
 
       // check the file exists
@@ -119,6 +122,7 @@ function encryptFiles(
 
         if (stats !== undefined && stats.isFile()) {
           encryptor(f, encrypted_data => {
+            console.log(encrypted_data.length)
             fs.writeFile(target_file, encrypted_data, err => {
               if (err) {
                 callbackCheck(target_file);
