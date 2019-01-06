@@ -1,1 +1,1 @@
-node start.js /path/to/config.json
+node start.js ./config.json

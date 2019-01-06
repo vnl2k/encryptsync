@@ -1,0 +1,10 @@
+{
+	"ignore": ["error.log"],
+  "ext": "txt md odt docx pptx zip pdf",
+	"source_path": "./source",
+  "target_path": "./target",
+  "options": {
+  	"public_key": "path/to/public_key.file",
+  	"method": "rsa"
+  }
+}
