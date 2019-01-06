@@ -8,13 +8,7 @@ const assert = require("assert"),
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
   resolver = name => Path.resolve("./tests/source/" + name),
-  FILES = [
-    resolver("a.txt"),
-    resolver("b.pdf"),
-    resolver("c.txt"),
-    resolver("d.doc"),
-    resolver("new-folder/a.doc")
-  ];
+  FILES = [resolver("a.txt"), resolver("b.pdf"), resolver("c.txt"), resolver("d.doc"), resolver("new-folder/a.doc")];
 /*
   KEY GENERATION
     # generate private key
@@ -52,10 +46,7 @@ describe("Testing encryption with RSA", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
-          2
-        );
+        assert.equal(encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0), 2);
         done();
       }
     );
@@ -69,10 +60,7 @@ describe("Testing encryption with RSA", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
-          4
-        );
+        assert.equal(encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0), 4);
         done();
       }
     );

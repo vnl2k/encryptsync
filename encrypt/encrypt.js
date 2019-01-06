@@ -13,14 +13,9 @@ const fs = require("fs"),
 const logMessage = log_path => message => {
   let log = ["[", Date(), "] ", message, "\n"].join("");
   console.log(log);
-  fs.appendFile(
-    log_path,
-    log,
-    "utf8",
-    err => {
-      if (err) throw err;
-    }
-  );
+  fs.appendFile(log_path, log, "utf8", err => {
+    if (err) throw err;
+  });
 };
 
 function RSAencryption(options) {
@@ -33,7 +28,8 @@ function RSAencryption(options) {
 
 function GPGencryption(options, errLogger) {
   return function(file_name, callback) {
-    let gpg = spawn("gpg", ["-e", "-r", options.email, "--output", "-", file_name]);
+    // trust-model = auto: Skip  key  validation  and  assume that used keys are always fully trusted.
+    let gpg = spawn("gpg", ["-e", "-r", options.email, "--trust-model", "always", "--output", "-", file_name]);
 
     gpg.stderr.on("message", message => errLogger(`GPG std error: ${message}`));
     gpg.on("error", message => errLogger(`GPG error: ${message}`));
@@ -42,29 +38,20 @@ function GPGencryption(options, errLogger) {
   };
 }
 
-function encryptFiles(
-  files,
-  encryptor_options,
-  source_path,
-  target_path,
-  errLogger,
-  callback,
-  scrambleNames = false
-) {
+function encryptFiles(files, encryptor_options, source_path, target_path, errLogger, callback, scrambleNames = false) {
   const fLen = files.length,
     MESSAGE_LIST = [],
     callbackCheck = (file, message, error) => {
       if (callback !== undefined) {
-        MESSAGE_LIST.push({path: file, message: message, error: error});
-        
+        MESSAGE_LIST.push({ path: file, message: message, error: error });
+
         if (MESSAGE_LIST.length === fLen) {
           callback(MESSAGE_LIST);
         }
       }
     };
 
-  let encryptor,
-    enc_ext;
+  let encryptor, enc_ext;
   switch (encryptor_options.method) {
     case "gpg":
       encryptor = GPGencryption(encryptor_options, errLogger);
@@ -77,11 +64,7 @@ function encryptFiles(
       enc_ext = ".rsa";
   }
 
-  if (
-    Path.isAbsolute(source_path) === true &&
-    Path.isAbsolute(target_path) === true &&
-    fLen > 0
-  )
+  if (Path.isAbsolute(source_path) === true && Path.isAbsolute(target_path) === true && fLen > 0)
     files.forEach(f => {
       let target_file,
         relative_path = f.replace(source_path, "");
@@ -93,10 +76,7 @@ function encryptFiles(
 
         sha256.update(fileName);
 
-        target_file = Path.resolve(
-          filePath.replace(source_path, target_path),
-          sha256.digest("hex") + enc_ext
-        );
+        target_file = Path.resolve(filePath.replace(source_path, target_path), sha256.digest("hex") + enc_ext);
       } else {
         target_file = f.replace(source_path, target_path) + enc_ext;
       }
@@ -169,7 +149,7 @@ module.exports = {
       .on("start", () => {})
       .on("restart", files => {
         encryptFiles(files, config.options, source_path, target_path, errLogger, list => {
-          console.log(list.map( i => i.message || i.error).join("\n"));
+          console.log(list.map(i => i.message || i.error).join("\n"));
         });
       })
       .on("quit", function() {

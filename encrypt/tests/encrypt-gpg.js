@@ -3,18 +3,12 @@
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles, logMessage } = require("../encrypt.js");
+  { encryptFiles } = require("../encrypt.js");
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
   resolver = name => Path.resolve("./tests/source/" + name),
-  FILES = [
-    resolver("a.txt"),
-    resolver("b.pdf"),
-    resolver("c.txt"),
-    resolver("d.doc"),
-    resolver("new-folder/a.doc"),
-  ],
+  FILES = [resolver("a.txt"), resolver("b.pdf"), resolver("c.txt"), resolver("d.doc"), resolver("new-folder/a.doc")],
   LARGE_FILE = resolver("large-file.txt"),
   MISSING_FILE = resolver("noSuchFile.txt");
 /*
@@ -27,10 +21,9 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
 
 // The account password is "test
 
-const GPGencryptor = () => ({ email: "nikolay.vaklev@gmail.com", method: "gpg" });
+const GPGencryptor = () => ({ email: "test@example.com", method: "gpg" });
 
 describe("Testing encryption with GPG", function() {
-
   it("should fail to encrypt a non-existing file", function(done) {
     encryptFiles(
       [MISSING_FILE],
@@ -39,7 +32,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       () => {},
       res => {
-        assert.equal(res[0].error.slice(0,33), "ENOENT: no such file or directory");
+        assert.equal(res[0].error.slice(0, 33), "ENOENT: no such file or directory");
         done();
       }
     );
@@ -86,10 +79,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       message => {},
       list => {
-        assert.equal(
-          list.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
-          2
-        );
+        assert.equal(list.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0), 2);
         done();
       }
     );
@@ -103,10 +93,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
-          4
-        );
+        assert.equal(encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0), 4);
         done();
       }
     );
@@ -120,10 +107,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
-          5
-        );
+        assert.equal(encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0), 5);
         done();
       }
     );
