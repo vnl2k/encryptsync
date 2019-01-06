@@ -2,14 +2,20 @@
 
 const fs = require("fs"),
   Crypto = require("crypto"),
+  // replace nodemon with fb-watchman?
+  // watchman detects deletes as well
+  // OR simply fs.watch
   nodemon = require("nodemon"),
   Path = require("path"),
   { spawn } = require("child_process");
 
+// used for loggin errors at the moment
 const logMessage = log_path => message => {
+  let log = ["[", Date(), "] ", message, "\n"].join("");
+  console.log(log);
   fs.appendFile(
     log_path,
-    ["[", Date(), "] ", message, "\n"].join(""),
+    log,
     "utf8",
     err => {
       if (err) throw err;
@@ -25,35 +31,14 @@ function RSAencryption(options) {
   };
 }
 
-function GPGencryption(options, logger) {
-  const gpg = spawn("gpg", ["-e", "-r", options.email, "--output", "-"], {
-    stdio: [
-      "pipe", // Pipe child's stdin to pipe
-      "pipe", // Pipe child's stdout to pipe
-      "pipe" // Direct child's stderr to pipe
-    ]
-  });
-
-  gpg.stderr.on("message", message => logger(`GPG stderr: ${message}`));
-  gpg.on("error", message => logger(`GPG error: ${message}`));
-
+function GPGencryption(options, errLogger) {
   return function(file_name, callback) {
-    gpg.stdin.write(file_name);
-    gpg.stdout.on("data", data => callback(data));
-    // gpg.stdout.on("readable", function() {
-    //   console.log('readable');
-    //   let data;
+    let gpg = spawn("gpg", ["-e", "-r", options.email, "--output", "-", file_name]);
 
-    //   while (data = gpg.stdout.read()) {
-    //     console.log(data)
-    //     callback(data);
-    //   }
-    // });
+    gpg.stderr.on("message", message => errLogger(`GPG std error: ${message}`));
+    gpg.on("error", message => errLogger(`GPG error: ${message}`));
 
-    // OR pipe stringht to a file
-    //const writable = fs.createWriteStream('file.txt');
-    // // All the data from readable goes into 'file.txt'
-    // readable.pipe(writable);
+    callback(gpg.stdin, gpg.stdout);
   };
 }
 
@@ -62,16 +47,19 @@ function encryptFiles(
   encryptor_options,
   source_path,
   target_path,
-  logger,
-  callback, // used for testing purposes at the moment
+  errLogger,
+  callback,
   scrambleNames = false
 ) {
   const fLen = files.length,
-    count = [],
-    callbackCheck = f => {
+    MESSAGE_LIST = [],
+    callbackCheck = (file, message, error) => {
       if (callback !== undefined) {
-        count.push(f);
-        if (count.length === fLen) callback(count);
+        MESSAGE_LIST.push({path: file, message: message, error: error});
+        
+        if (MESSAGE_LIST.length === fLen) {
+          callback(MESSAGE_LIST);
+        }
       }
     };
 
@@ -79,7 +67,7 @@ function encryptFiles(
     enc_ext;
   switch (encryptor_options.method) {
     case "gpg":
-      encryptor = GPGencryption(encryptor_options, logger);
+      encryptor = GPGencryption(encryptor_options, errLogger);
       enc_ext = ".gpg";
       break;
 
@@ -116,28 +104,43 @@ function encryptFiles(
       // check the file exists
       fs.stat(f, (err, stats) => {
         if (err) {
-          callbackCheck(target_file);
-          return logger(err);
+          callbackCheck(target_file, undefined, err.message);
+          return;
         }
 
         if (stats !== undefined && stats.isFile()) {
-          encryptor(f, encrypted_data => {
-            console.log(encrypted_data.length)
-            fs.writeFile(target_file, encrypted_data, err => {
-              if (err) {
-                callbackCheck(target_file);
-                return logger(err);
-              }
+          switch (encryptor_options.method) {
+            case "gpg":
+              encryptor(f, (stdin, stdout) => {
+                stdout
+                  .on("close", () => callbackCheck(target_file, `[${Date()}] encrypted: ${relative_path}\n`))
+                  .on("error", message => callbackCheck(target_file, message));
 
-              console.log(`[${Date()}] encrypted: ${relative_path}\n`);
-              callbackCheck(target_file);
-            });
-          });
+                stdout.pipe(fs.createWriteStream(target_file));
+
+                // // triggers file encryption
+                // stdin.write(f);
+                // stdin.end();
+              });
+              break;
+
+            case "none":
+            default:
+              encryptor(f, encrypted_data => {
+                fs.writeFile(target_file, encrypted_data, err => {
+                  if (err) {
+                    callbackCheck(target_file, undefined, err.message);
+                  } else {
+                    callbackCheck(target_file, `[${Date()}] encrypted: ${relative_path}\n`);
+                  }
+                });
+              });
+          }
         }
       });
     });
   else {
-    console.log(`[${Date()}] no files were encrypted. Bad inputs!\n`);
+    errLogger(`[${Date()}] NO files were encrypted!\n`);
   }
 }
 
@@ -155,7 +158,7 @@ module.exports = {
       source_path = Path.resolve(config.source_path),
       target_path = Path.resolve(config.target_path),
       error_log_path = Path.join(Path.dirname(config_json_path), "error.log"),
-      logger = logMessage(error_log_path);
+      errLogger = logMessage(error_log_path);
 
     // nodemon looks for "watch" key in the config object
     config.watch = [source_path];
@@ -165,7 +168,9 @@ module.exports = {
     nodemon(config)
       .on("start", () => {})
       .on("restart", files => {
-        encryptFiles(files, config.options, source_path, target_path, logger);
+        encryptFiles(files, config.options, source_path, target_path, errLogger, list => {
+          console.log(list.map( i => i.message || i.error).join("\n"));
+        });
       })
       .on("quit", function() {
         console.log("App has quit");

@@ -1,8 +1,5 @@
 "use strict";
 
-// Run the ahole app:
-// npm run monitor test@example.com ./tests/source ./tests/target
-
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
@@ -39,7 +36,7 @@ describe("Testing encryption with RSA", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+        fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
@@ -56,7 +53,7 @@ describe("Testing encryption with RSA", function() {
       message => {},
       encrypted_files => {
         assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
+          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
           2
         );
         done();
@@ -73,7 +70,7 @@ describe("Testing encryption with RSA", function() {
       message => {},
       encrypted_files => {
         assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
+          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
           4
         );
         done();
@@ -89,7 +86,7 @@ describe("Testing encryption with RSA", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+        fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
@@ -105,7 +102,7 @@ describe("Testing encryption with RSA", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+        fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });

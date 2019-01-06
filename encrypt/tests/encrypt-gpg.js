@@ -1,12 +1,9 @@
 "use strict";
 
-// Run the ahole app:
-// npm run monitor test@example.com ./tests/source ./tests/target
-
 const assert = require("assert"),
   Path = require("path"),
   fs = require("fs"),
-  { encryptFiles } = require("../encrypt.js");
+  { encryptFiles, logMessage } = require("../encrypt.js");
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
@@ -16,8 +13,10 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
     resolver("b.pdf"),
     resolver("c.txt"),
     resolver("d.doc"),
-    resolver("new-folder/a.doc")
-  ];
+    resolver("new-folder/a.doc"),
+  ],
+  LARGE_FILE = resolver("large-file.txt"),
+  MISSING_FILE = resolver("noSuchFile.txt");
 /*
   KEY GENERATION
     # generate private key
@@ -28,18 +27,50 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
 
 // The account password is "test
 
-const GPGencryptor = () => ({ email: "test@example.com", method: "gpg" });
+const GPGencryptor = () => ({ email: "nikolay.vaklev@gmail.com", method: "gpg" });
 
 describe("Testing encryption with GPG", function() {
+
+  it("should fail to encrypt a non-existing file", function(done) {
+    encryptFiles(
+      [MISSING_FILE],
+      GPGencryptor(),
+      SOURCE_PATH,
+      TARGET_PATH,
+      () => {},
+      res => {
+        assert.equal(res[0].error.slice(0,33), "ENOENT: no such file or directory");
+        done();
+      }
+    );
+  });
+
   it("should encrypt a single file", function(done) {
     encryptFiles(
       FILES.slice(0, 1),
       GPGencryptor(),
       SOURCE_PATH,
       TARGET_PATH,
+      () => {},
+      res => {
+        fs.stat(res[0].path, (err, stats) => {
+          if (err !== null) assert.fail(err);
+          if (stats !== undefined) assert.equal(stats.isFile(), true);
+          done();
+        });
+      }
+    );
+  });
+
+  it("should encrypt a single large file", function(done) {
+    encryptFiles(
+      [LARGE_FILE],
+      GPGencryptor(),
+      SOURCE_PATH,
+      TARGET_PATH,
       message => {},
-      encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+      list => {
+        fs.stat(list[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
@@ -54,9 +85,9 @@ describe("Testing encryption with GPG", function() {
       SOURCE_PATH,
       TARGET_PATH,
       message => {},
-      encrypted_files => {
+      list => {
         assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
+          list.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
           2
         );
         done();
@@ -73,8 +104,25 @@ describe("Testing encryption with GPG", function() {
       message => {},
       encrypted_files => {
         assert.equal(
-          encrypted_files.reduce((a, f) => a + fs.statSync(f).isFile(), 0),
+          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
           4
+        );
+        done();
+      }
+    );
+  });
+
+  it("should encrypt four files and a large one", function(done) {
+    encryptFiles(
+      [LARGE_FILE].concat(FILES.slice(0, 4)),
+      GPGencryptor(),
+      SOURCE_PATH,
+      TARGET_PATH,
+      message => {},
+      encrypted_files => {
+        assert.equal(
+          encrypted_files.reduce((a, f) => a + fs.statSync(f.path).isFile(), 0),
+          5
         );
         done();
       }
@@ -89,7 +137,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+        fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
@@ -105,7 +153,7 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       message => {},
       encrypted_files => {
-        fs.stat(encrypted_files[0], (err, stats) => {
+        fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
           process.exit(0);
