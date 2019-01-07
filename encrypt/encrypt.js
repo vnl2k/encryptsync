@@ -2,17 +2,14 @@
 
 const fs = require("fs"),
   Crypto = require("crypto"),
-  // replace nodemon with fb-watchman?
-  // watchman detects deletes as well
-  // OR simply fs.watch
-  nodemon = require("nodemon"),
+  Chokidar = require("chokidar"),
   Path = require("path"),
   { spawn } = require("child_process");
 
 // used for loggin errors at the moment
-const logMessage = log_path => message => {
+const logMessage = (log_path, toConsole=true) => message => {
   let log = ["[", Date(), "] ", message, "\n"].join("");
-  console.log(log);
+  if(toConsole === true) console.log(log);
   fs.appendFile(log_path, log, "utf8", err => {
     if (err) throw err;
   });
@@ -93,7 +90,7 @@ function encryptFiles(files, encryptor_options, source_path, target_path, errLog
             case "gpg":
               encryptor(f, (stdin, stdout) => {
                 stdout
-                  .on("close", () => callbackCheck(target_file, `[${Date()}] encrypted: ${relative_path}\n`))
+                  .on("close", () => callbackCheck(target_file, `Encrypted: ${relative_path}\n`))
                   .on("error", message => callbackCheck(target_file, message));
 
                 stdout.pipe(fs.createWriteStream(target_file));
@@ -111,7 +108,7 @@ function encryptFiles(files, encryptor_options, source_path, target_path, errLog
                   if (err) {
                     callbackCheck(target_file, undefined, err.message);
                   } else {
-                    callbackCheck(target_file, `[${Date()}] encrypted: ${relative_path}\n`);
+                    callbackCheck(target_file, `Encrypted: ${relative_path}\n`);
                   }
                 });
               });
@@ -137,24 +134,40 @@ module.exports = {
     let config = JSON.parse(fs.readFileSync(config_json_path)),
       source_path = Path.resolve(config.source_path),
       target_path = Path.resolve(config.target_path),
-      error_log_path = Path.join(Path.dirname(config_json_path), "error.log"),
-      errLogger = logMessage(error_log_path);
+      log_path = Path.join(Path.dirname(config_json_path), "encrypt-monitor.log"),
+      errLogger = logMessage(log_path),
+      opsLogger = logMessage(log_path);
 
     // nodemon looks for "watch" key in the config object
     config.watch = [source_path];
     config.script = Path.resolve("./encrypt.js");
 
-    console.log("Starting encrypt monitor...");
-    nodemon(config)
-      .on("start", () => {})
-      .on("restart", files => {
-        encryptFiles(files, config.options, source_path, target_path, errLogger, list => {
-          console.log(list.map(i => i.message || i.error).join("\n"));
-        });
+    console.log("Starting encryption monitor...");
+    console.log(`Watching folder:\n\t${source_path}`);
+    console.log("To exit press: CTRL + C");
+
+    let Watcher = Chokidar.watch(source_path, {
+      ignoreInitial: true,
+      ignored: /(^|[\/\\])\../,
+      persistent: true
+    });
+
+    Watcher.on("add", path =>
+      encryptFiles([path], config.options, source_path, target_path, errLogger, list => {
+        opsLogger(list.map(i => i.message || i.error).join("\n"));
       })
-      .on("quit", function() {
-        console.log("App has quit");
-        process.exit(0);
-      });
+    )
+      .on("change", path =>
+        encryptFiles([path], config.options, source_path, target_path, errLogger, list => {
+          opsLogger(list.map(i => i.message || i.error).join("\n"));
+        })
+      )
+      .on("unlink", path => console.log(`File ${path} has been removed`));
+
+    process.on("SIGINT", function() {
+      console.log("\nGoodbye!");
+      Watcher.close();
+      process.exit(0);
+    });
   }
 };
