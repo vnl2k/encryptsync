@@ -8,11 +8,12 @@ const fs = require("fs"),
 
 // used for loggin errors at the moment
 const logMessage = (log_path, toConsole=true) => message => {
-  let log = ["[", Date(), "] ", message, "\n"].join("");
-  if(toConsole === true) console.log(log);
-  fs.appendFile(log_path, log, "utf8", err => {
+  if (toConsole === true) console.log(["[", (new Date()).toLocaleTimeString(), "] ", message, "\n"].join(""));
+
+  fs.appendFile(log_path, ["[", Date(), "] ", message, "\n"].join(""), "utf8", err => {
     if (err) throw err;
   });
+
 };
 
 function RSAencryption(options) {
@@ -117,7 +118,7 @@ function encryptFiles(files, encryptor_options, source_path, target_path, errLog
       });
     });
   else {
-    errLogger(`[${Date()}] NO files were encrypted!\n`);
+    errLogger(`[${Date()}] No files were encrypted!\n`);
   }
 }
 
@@ -130,7 +131,7 @@ module.exports = {
 
   GPGencryption: GPGencryption,
 
-  monitor: config_json_path => {
+  monitor: (config_json_path, encryptFiles) => {
     let config = JSON.parse(fs.readFileSync(config_json_path)),
       source_path = Path.resolve(config.source_path),
       target_path = Path.resolve(config.target_path),
@@ -142,9 +143,9 @@ module.exports = {
     config.watch = [source_path];
     config.script = Path.resolve("./encrypt.js");
 
-    console.log("Starting encryption monitor...");
-    console.log(`Watching folder:\n\t${source_path}`);
-    console.log("To exit press: CTRL + C");
+    opsLogger("Starting encryption monitor...");
+    opsLogger(`Watching folder:\n\t${source_path}`);
+    opsLogger("To exit press: CTRL + C");
 
     let Watcher = Chokidar.watch(source_path, {
       ignoreInitial: true,
@@ -152,20 +153,32 @@ module.exports = {
       persistent: true
     });
 
-    Watcher.on("add", path =>
-      encryptFiles([path], config.options, source_path, target_path, errLogger, list => {
-        opsLogger(list.map(i => i.message || i.error).join("\n"));
-      })
-    )
+    Watcher
+      .on("add", path =>
+        encryptFiles([path], config.options, source_path, target_path, errLogger, list => {
+          opsLogger(list.map(i => i.message || i.error).join("\n"));
+        })
+      )
       .on("change", path =>
         encryptFiles([path], config.options, source_path, target_path, errLogger, list => {
           opsLogger(list.map(i => i.message || i.error).join("\n"));
         })
       )
-      .on("unlink", path => console.log(`File ${path} has been removed`));
+      .on("unlink", path => opsLogger(`File ${path} has been removed`));
+	
+    if (process.platform === "win32") {
+      var rl = require("readline").createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      rl.on("SIGINT", function () {
+        process.emit("SIGINT");
+      });
+    }
 
     process.on("SIGINT", function() {
-      console.log("\nGoodbye!");
+      opsLogger("\nGoodbye!");
       Watcher.close();
       process.exit(0);
     });

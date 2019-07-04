@@ -4,3 +4,6 @@
 *.rsaencrypt
 *.cert
 *.pem
+
+/tests
+*.log

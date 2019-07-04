@@ -1,6 +1,6 @@
 "use strict";
 
-const { monitor } = require("./encrypt.js"),
+const { encryptFiles, monitor } = require("./encrypt.js"),
   CONFIG_PATH = process.argv[2];
 
 if (CONFIG_PATH == undefined) {
@@ -8,4 +8,4 @@ if (CONFIG_PATH == undefined) {
   process.exit(1);
 }
 
-monitor(CONFIG_PATH);
+monitor(CONFIG_PATH, encryptFiles);

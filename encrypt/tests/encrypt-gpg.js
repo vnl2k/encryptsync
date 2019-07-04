@@ -140,7 +140,6 @@ describe("Testing encryption with GPG", function() {
         fs.stat(encrypted_files[0].path, (err, stats) => {
           if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
-          process.exit(0);
         });
       },
       true
