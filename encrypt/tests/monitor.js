@@ -7,12 +7,8 @@ const Assert = require("assert"),
   { monitor } = require("../encrypt.js");
 
 
-const SOURCE_PATH = Path.resolve("./tests/source");
-  // TARGET_PATH = Path.resolve("./tests/target"),
-  // resolver = name => Path.resolve("./tests/source/" + name),
-  // FILES = [resolver("a.txt"), resolver("b.pdf"), resolver("c.txt"), resolver("d.doc"), resolver("new-folder/a.doc")],
-  // LARGE_FILE = resolver("large-file.txt"),
-  // MISSING_FILE = resolver("noSuchFile.txt");
+const SOURCE_PATH = Path.resolve("./tests/source"),
+  TARGET_FILE = Path.join(SOURCE_PATH, "/new_file.txt");
 
 // https://nodejs.org/api/stream.html#stream_implementing_a_writable_stream
 let queue  = new Stream.Duplex({
@@ -41,17 +37,38 @@ monitor("./config.json", encryptFilesStub);
 describe("Testing encryption with GPG", function() {
   it("should encrypt a new file", function(done) {
 
-    Fs.writeFileSync(Path.join(SOURCE_PATH, "/new_file.txt"), "test");
+    Fs.writeFileSync(TARGET_FILE, "test: create file\n");
 
     setTimeout(() => {
-      let chunk = queue.read();
-      console.log(chunk);
-
-      Assert.equal(1,1);
+      Assert.equal(Fs.existsSync(queue.read()[0]), true);
       done();
-      process.exit(0);
+    }, 10);
+  });
+
+  it("should encrypt an updated file", function(done) {
+    Fs.writeFileSync(TARGET_FILE, "test: update file\n", {flag: 'a'});
+
+    setTimeout(() => {
+      Assert.equal(queue.read()[0], TARGET_FILE);
+      done();
     }, 10);
    
+  });
 
+  it("should sync a deleted file", function(done) {
+    Fs.unlinkSync(TARGET_FILE);
+
+    setTimeout(() => {
+      Assert.equal(queue.read()[0], TARGET_FILE);
+      done();
+    }, 10);
+   
+  });
+
+  // adds 50 ms delay between each test
+  afterEach((done) => setTimeout(done, 50));
+
+  after(() => {
+    process.exit(0);
   });
 });

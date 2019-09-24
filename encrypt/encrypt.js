@@ -4,37 +4,38 @@ const fs = require("fs"),
   Crypto = require("crypto"),
   Chokidar = require("chokidar"),
   Path = require("path"),
-  { spawn } = require("child_process");
+  { logMessage } = require('./src/utils'),
+  { RSAencryption, GPGencryption } = require('./src/encryptors');
 
-// used for loggin errors at the moment
-const logMessage = (log_path, toConsole=true) => message => {
-  if (toConsole === true) console.log(["[", (new Date()).toLocaleTimeString(), "] ", message, "\n"].join(""));
+// // used for loggin errors at the moment
+// const logMessage = (log_path, toConsole=true) => message => {
+//   if (toConsole === true) console.log(["[", (new Date()).toLocaleTimeString(), "] ", message, "\n"].join(""));
 
-  fs.appendFile(log_path, ["[", Date(), "] ", message, "\n"].join(""), "utf8", err => {
-    if (err) throw err;
-  });
+//   fs.appendFile(log_path, ["[", Date(), "] ", message, "\n"].join(""), "utf8", err => {
+//     if (err) throw err;
+//   });
 
-};
+// };
 
-function RSAencryption(options) {
-  const publicKey = fs.readFileSync(options.public_key, "utf8");
+// function RSAencryption(options) {
+//   const publicKey = fs.readFileSync(options.public_key, "utf8");
 
-  return function(file, callback) {
-    callback(Crypto.publicEncrypt(publicKey, fs.readFileSync(file)));
-  };
-}
+//   return function(file, callback) {
+//     callback(Crypto.publicEncrypt(publicKey, fs.readFileSync(file)));
+//   };
+// }
 
-function GPGencryption(options, errLogger) {
-  return function(file_name, callback) {
-    // trust-model = auto: Skip  key  validation  and  assume that used keys are always fully trusted.
-    let gpg = spawn("gpg", ["-e", "-r", options.email, "--trust-model", "always", "--output", "-", file_name]);
+// function GPGencryption(options, errLogger) {
+//   return function(file_name, callback) {
+//     // trust-model = auto: Skip  key  validation  and  assume that used keys are always fully trusted.
+//     let gpg = spawn("gpg", ["-e", "-r", options.email, "--trust-model", "always", "--output", "-", file_name]);
 
-    gpg.stderr.on("message", message => errLogger(`GPG std error: ${message}`));
-    gpg.on("error", message => errLogger(`GPG error: ${message}`));
+//     gpg.stderr.on("message", message => errLogger(`GPG std error: ${message}`));
+//     gpg.on("error", message => errLogger(`GPG error: ${message}`));
 
-    callback(gpg.stdin, gpg.stdout);
-  };
-}
+//     callback(gpg.stdin, gpg.stdout);
+//   };
+// }
 
 function encryptFiles(files, encryptor_options, source_path, target_path, errLogger, callback, scrambleNames = false) {
   const fLen = files.length,
