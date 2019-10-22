@@ -13,10 +13,12 @@ function deleteGPGFiles(files) {
 
 }
 
-const logMessage = (log_path, toConsole=true) => message => {
-  if (toConsole === true) console.log(["[", (new Date()).toLocaleTimeString(), "] ", message, "\n"].join(""));
+const logMessage = (log_path, tags, toConsole=true) => message => {
+  let fullMessage = `[${(new Date()).toLocaleTimeString()}] [${tags}] ${message}\n`;
 
-  Fs.appendFile(log_path, ["[", Date(), "] ", message, "\n"].join(""), "utf8", err => {
+  if (toConsole === true) console.log(fullMessage);
+
+  Fs.appendFile(log_path, fullMessage, "utf8", err => {
     if (err) throw err;
   });
 

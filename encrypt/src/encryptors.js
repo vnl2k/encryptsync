@@ -5,7 +5,7 @@ const  { spawn } = require("child_process"),
   Crypto = require("crypto");
 
 
-function RSAencryption(options) {
+function RSAencryption(options, errLogger) {
   const publicKey = Fs.readFileSync(options.public_key, "utf8");
 
   return function(file, callback) {
@@ -26,6 +26,12 @@ function GPGencryption(options, errLogger) {
 }
 
 module.exports = {
-  RSAencryption,
-  GPGencryption 
+  RSAencryption: {
+    encryptor: RSAencryption,
+    extention: '.rsa'
+  },
+  GPGencryption: {
+    encryptor: GPGencryption,
+    extention: '.gpg'
+  }
 };
