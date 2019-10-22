@@ -26,7 +26,15 @@ let queue  = new Stream.Duplex({
   }
 });
 
-let encryptFilesStub = (files, encryptor_options, source_path, target_path, errLogger, callback, scrambleNames=false) => {
+let encryptFilesStub = (
+  files,
+  encryptor_options,
+  source_path,
+  target_path,
+  errLogger,
+  callback,
+  scrambleNames=false
+) => {
   queue.write(files);
 };
 

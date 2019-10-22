@@ -14,11 +14,11 @@ function deleteGPGFiles(files) {
 }
 
 const logMessage = (log_path, tags, toConsole=true) => message => {
-  let fullMessage = `[${(new Date()).toLocaleTimeString()}] [${tags}] ${message}\n`;
+  let fullMessage = `[${(new Date()).toLocaleTimeString()}] [${tags}] ${message}`;
 
   if (toConsole === true) console.log(fullMessage);
 
-  Fs.appendFile(log_path, fullMessage, "utf8", err => {
+  Fs.appendFile(log_path, fullMessage + "\n", "utf8", err => {
     if (err) throw err;
   });
 

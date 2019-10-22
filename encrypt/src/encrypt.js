@@ -118,7 +118,7 @@ module.exports = {
       options = config.options;
 
     opsLogger("Starting encryption monitor...");
-    opsLogger(`Watching folder:\n\t${source_path}`);
+    opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
     let Watcher = Chokidar.watch(source_path, {
