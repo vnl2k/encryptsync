@@ -4,6 +4,4 @@
 *.rsaencrypt
 *.cert
 *.pem
-
-/tests
 *.encryptsyncLog
