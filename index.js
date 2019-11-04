@@ -1,6 +1,6 @@
 "use strict";
 
-const { encryptFiles, monitor } = require("./src/encrypt.js"),
+const { monitor, encryptFile} = require("./src/encrypt"),
   CONFIG_PATH = process.argv[2] || (process.env.HOME + "/.encryptsyncrc");
 
-monitor(CONFIG_PATH, encryptFiles);
+monitor(CONFIG_PATH, encryptFile);

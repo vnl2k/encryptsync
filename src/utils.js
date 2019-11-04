@@ -1,7 +1,10 @@
 "use strict";
 
-const Fs = require("fs"),
-  FsPromise = require("fs").promises;
+const Crypto = require("crypto"),
+  Path = require("path"),
+  Fs = require("fs"),
+  FsPromise = require("fs").promises,
+  { RSAencryption } = require('./encryptors');
 
 function deleteGPGFiles(files) {
 
@@ -24,7 +27,23 @@ const logMessage = (log_path, tags, toConsole=true) => message => {
 
 };
 
+const sha256Name = (file) => {
+  const fileName = Path.basename(file),
+    sha256 = Crypto.createHash("sha256");
+
+  sha256.update(fileName);
+  return sha256.digest("hex");
+}
+
+// const RSAencryptor = RSAencryption.encryptor();
+
+const RSAName = (file) => {
+
+}
+
 module.exports = {
   deleteGPGFiles,
-  logMessage
+  logMessage,
+  sha256Name,
+  RSAName
 };

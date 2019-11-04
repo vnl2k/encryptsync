@@ -6,4 +6,4 @@
 *.pem
 
 /tests
-*.log
+*.encryptsyncLog

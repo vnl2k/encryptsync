@@ -5,18 +5,18 @@ const  { spawn } = require("child_process"),
   Crypto = require("crypto");
 
 
-function RSAencryption(options, errLogger) {
-  const publicKey = Fs.readFileSync(options.public_key, "utf8");
+function RSAencryption({public_key}, errLogger) {
+  const publicKey = Fs.readFileSync(public_key, "utf8");
 
   return function(file, callback) {
     callback(Crypto.publicEncrypt(publicKey, Fs.readFileSync(file)));
   };
 }
 
-function GPGencryption(options, errLogger) {
-  return function(file_name, callback) {
+function GPGencryption({email}, errLogger) {
+  return function(sourceFile, callback) {
     // trust-model = auto: Skip  key  validation  and  assume that used keys are always fully trusted.
-    let gpg = spawn("gpg", ["-e", "-r", options.email, "--trust-model", "always", "--output", "-", file_name]);
+    let gpg = spawn("gpg", ["-e", "-r", email, "--trust-model", "always", "--output", "-", sourceFile]);
 
     gpg.stderr.on("message", message => errLogger(`GPG std error: ${message}`));
     gpg.on("error", message => errLogger(`GPG error: ${message}`));

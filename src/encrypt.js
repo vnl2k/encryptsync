@@ -1,10 +1,10 @@
 "use strict";
 
 const fs = require("fs"),
-  Crypto = require("crypto"),
+  fsp = fs.promises,
   Chokidar = require("chokidar"),
   Path = require("path"),
-  { logMessage } = require('./utils'),
+  { logMessage, sha256Name } = require('./utils'),
   { RSAencryption, GPGencryption } = require('./encryptors');
 
 const getRelativePath = (file, source) => file.replace(source, "");
@@ -20,95 +20,75 @@ const switchEncryptors = (name) => {
   }
 };
 
-function encryptFiles(
-  files,
-  encryptor_options,
+function encryptFile(
+  encryptor,
+  file_extention,
+  method,
   source_path,
   target_path,
-  errLogger,
   callback,
   scrambleNames = false
 ) {
-  const fLen = files.length,
-    MESSAGE_LIST = [],
-    callbackCheck = (file, message, error) => {
-      if (callback !== undefined) {
-        MESSAGE_LIST.push({ path: file, message: message, error: error });
+  return f => {
+    let target_file = getTargetPath(f, source_path, target_path) + file_extention,
+      relative_path = getRelativePath(f, source_path);
 
-        if (MESSAGE_LIST.length === fLen) {
-          callback(MESSAGE_LIST);
-        }
-      }
-    };
+    if (scrambleNames === true) {
+      // FIX ME!! REPLAVE SHA-256 WITH RSA ENCRYPTION
+      target_file = Path.resolve(Path.dirname(target_file), sha256Name(Path.basename(f)) + file_extention);
+    }
 
-  let {encryptor, extention: ext } = switchEncryptors(encryptor_options.method);
-  encryptor = encryptor(encryptor_options, errLogger);
+    // // check that the target file path exists
+    // let targetFilePath = Path.dirname(target_file);
+    // fsp
+    //   .stat(targetFilePath)
+    //   .catch( err => {
+    //     if (err !== undefined) {
+    //       fsp.mkdir(targetFilePath, {recursive: true})
+    //     }
+    //   })
 
-  if (Path.isAbsolute(source_path) === true && Path.isAbsolute(target_path) === true && fLen > 0)
-    files.forEach(f => {
-      let target_file,
-        relative_path = getRelativePath(f, source_path);
-
-      if (scrambleNames === true) {
-        const fileName = Path.basename(f),
-          filePath = Path.dirname(f),
-          sha256 = Crypto.createHash("sha256");
-
-        sha256.update(fileName);
-
-        target_file = Path.resolve(filePath.replace(source_path, target_path), sha256.digest("hex") + ext);
-      } else {
-        target_file = getTargetPath(f, source_path, target_path) + ext;
+    // check the file exists
+    fs.stat(f, (err, stats) => {
+      if (err) {
+        callback(target_file, err.message);
+        return;
       }
 
-      // check the file exists
-      fs.stat(f, (err, stats) => {
-        if (err) {
-          callbackCheck(target_file, undefined, err.message);
-          return;
-        }
+      if (stats !== undefined && stats.isFile()) {
+        switch (method) {
+          case "gpg":
+            encryptor(f, (stdin, stdout) => {
+              stdout
+                .on("close", () => callback(target_file, `Encrypted: ${relative_path}\n`))
+                .on("error", message => callback(target_file, message));
 
-        if (stats !== undefined && stats.isFile()) {
-          switch (encryptor_options.method) {
-            case "gpg":
-              encryptor(f, (stdin, stdout) => {
-                stdout
-                  .on("close", () => callbackCheck(target_file, `Encrypted: ${relative_path}\n`))
-                  .on("error", message => callbackCheck(target_file, message));
+              stdout.pipe(fs.createWriteStream(target_file));
 
-                stdout.pipe(fs.createWriteStream(target_file));
+            });
+            break;
 
+          case "none":
+          default:
+            encryptor(f, encrypted_data => {
+              fs.writeFile(target_file, encrypted_data, err => {
+                if (err) {
+                  callback(target_file, err.message);
+                } else {
+                  callback(target_file, `Encrypted: ${relative_path}\n`);
+                }
               });
-              break;
-
-            case "none":
-            default:
-              encryptor(f, encrypted_data => {
-                fs.writeFile(target_file, encrypted_data, err => {
-                  if (err) {
-                    callbackCheck(target_file, undefined, err.message);
-                  } else {
-                    callbackCheck(target_file, `Encrypted: ${relative_path}\n`);
-                  }
-                });
-              });
-          }
+            });
         }
-      });
+      }
     });
-  else {
-    errLogger("No files were encrypted!\n");
-  }
+  };
 }
 
 module.exports = {
-  encryptFiles: encryptFiles,
+  encryptFile,
 
-  RSAencryption: RSAencryption,
-
-  GPGencryption: GPGencryption,
-
-  monitor: (configPath, encryptFiles) => {
+  monitor: (configPath, encryptFile) => {
     const config = JSON.parse(fs.readFileSync(configPath)),
       source_path = Path.resolve(config.source_path),
       target_path = Path.resolve(config.target_path),
@@ -121,6 +101,21 @@ module.exports = {
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
+    const {
+      encryptor: encryptorTemplate,
+      extention: file_extention
+    } = switchEncryptors(options.method);
+    
+    const encryptor = encryptFile(
+      encryptorTemplate(options, errLogger),
+      file_extention,
+      options.method,
+      source_path,
+      target_path,
+      (target, message) => opsLogger(message)
+    );
+
+    // FIX ME: ALLOW THE CONFIG SETTINGS TO APPLY
     let Watcher = Chokidar.watch(source_path, {
       ignoreInitial: true,
       ignored: /(^|[\/\\])\../,
@@ -128,20 +123,12 @@ module.exports = {
     });
 
     Watcher
-      .on("add", path =>
-        encryptFiles([path], options, source_path, target_path, errLogger, list => {
-          opsLogger(list.map(i => i.message || i.error).join("\n"));
-        })
-      )
-      .on("change", path =>
-        encryptFiles([path], options, source_path, target_path, errLogger, list => {
-          opsLogger(list.map(i => i.message || i.error).join("\n"));
-        })
-      )
+      .on("add", path => encryptor(path))
+      .on("change", path => encryptor(path))
       .on("unlink", path => {
         let ext = switchEncryptors(options.method).extention;
         fs.unlinkSync(getTargetPath(path, source_path, target_path) + ext);
-        opsLogger(`Removed file: ${getRelativePath(path, source_path)}\n`);
+        // opsLogger(`Removed file: ${getRelativePath(path, source_path)}\n`);
       });
 	
     if (process.platform === "win32") {
