@@ -1,10 +1,10 @@
 {
-  "name": "syncApp",
-  "version": "0.1.2",
+  "name": "encryptsync",
+  "version": "0.2.7",
   "description": "The app monitors a folder for changes and encrypts with GPG chnaged files before moving them to the target folder.",
   "scripts": {
     "prettier": "prettier --loglevel error --use-tabs false --write \"**/*.js\"",
-    "tests": "mocha $(find tests -name '*.js')"
+    "test": "mocha $(find tests -name '*.js')"
   },
   "repository": {
     "type": "git",
@@ -12,8 +12,11 @@
   },
   "license": "LGPL-3.0-only",
   "author": "vnl2k",
+  "prettier": {
+    "printWidth": 120
+  },
   "dependencies": {
-    "nodemon": "^1.18.4"
+    "chokidar": "^2.0.4"
   },
   "devDependencies": {
     "eslint": "^5.6.1",

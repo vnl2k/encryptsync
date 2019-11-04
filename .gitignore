@@ -1,2 +1,9 @@
 **/node_modules
 **/target
+*.asc
+*.rsaencrypt
+*.cert
+*.pem
+
+/tests
+*.encryptsyncLog
