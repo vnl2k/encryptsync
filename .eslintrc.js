@@ -3,7 +3,7 @@ module.exports = {
         "es6": true,
         "node": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:mocha/recommended"],
     "parserOptions": {
         "sourceType": "module"
     },
@@ -19,15 +19,14 @@ module.exports = {
         ],
         "quotes": [
             "error",
-            "double"
+            "single"
         ],
         "semi": [
             "error",
             "always"
         ]
     },
-    "globals": {
-        "describe": true, // mocha
-        "it": true // mocha
-    }
+    "plugins": [
+        "mocha"
+    ],
 };

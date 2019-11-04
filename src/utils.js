@@ -3,8 +3,8 @@
 const Crypto = require("crypto"),
   Path = require("path"),
   Fs = require("fs"),
-  FsPromise = require("fs").promises,
-  { RSAencryption } = require('./encryptors');
+  FsPromise = require("fs").promises;
+  // { RSAencryption } = require('./encryptors');
 
 function deleteGPGFiles(files) {
 
@@ -33,17 +33,17 @@ const sha256Name = (file) => {
 
   sha256.update(fileName);
   return sha256.digest("hex");
-}
+};
 
 // const RSAencryptor = RSAencryption.encryptor();
 
-const RSAName = (file) => {
+// const RSAName = (file) => {
 
-}
+// };
 
 module.exports = {
   deleteGPGFiles,
   logMessage,
   sha256Name,
-  RSAName
+  // RSAName
 };

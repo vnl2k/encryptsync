@@ -7,9 +7,7 @@ const Assert = require("assert"),
   { monitor } = require("../src/encrypt");
 
 
-const getTargetPath = (file, source, target) => file.replace(source, target);
 const SOURCE_PATH = Path.resolve("./tests/source"),
-  TARGET_PATH = Path.resolve("./tests/target"),
   SOURCE_FILE = Path.join(SOURCE_PATH, "/new_file.txt"),
   TARGET_FILE = Path.resolve("./tests/target/new_file.txt.gpg");
 
