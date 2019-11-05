@@ -43,23 +43,14 @@ function encryptFile(
     
     const targetFolderCheck = fsp
       .stat(targetFilePath)
-      .catch( err => {
-        if (err !== undefined) {
-          return fsp.mkdir(targetFilePath, {recursive: true});
-        }
-
-        return Promise.resolve();
+      .catch( () => {
+        // if the folder does NOT exist, create it
+        return fsp.mkdir(targetFilePath, {recursive: true});
       });
 
-    // check the file exists
-    const sourceFileCheck = fsp
-      .stat(f)
-      .catch( err => {
-        callback(target_file, err.message);
-      });
-
+    // check the file exists: fsp.stat(f)
     Promise
-      .all([sourceFileCheck, targetFolderCheck])
+      .all([fsp.stat(f), targetFolderCheck])
       .then( () => {
         switch (method) {
           case "gpg":

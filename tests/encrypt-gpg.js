@@ -17,7 +17,8 @@ const SOURCE_PATH = Path.resolve("./tests/source"),
   resolver = name => SOURCE_PATH + '/' + name,
   FILES = [resolver("a.txt"), resolver("b.pdf"), resolver("c.txt"), resolver("d.doc"), resolver("new-folder/a.doc")],
   LARGE_FILE = resolver("large-file.txt"),
-  MISSING_FILE = resolver("noSuchFile.txt");
+  MISSING_FILE = resolver("noSuchFile.txt"),
+  EXTRA_FILE = resolver('missing-folder/extra-file.md');
 
 const futureEncryptFile = (f) => new Promise(
   (resolve, reject) => encryptFile(
@@ -41,20 +42,20 @@ const futureEncryptFile = (f) => new Promise(
    */
 
 describe("Testing encryption with GPG", function() {
-  // it("should fail to encrypt a non-existing file", function(done) {
+  it("should fail to encrypt a non-existing file", function(done) {
 
-  //   encryptFile(
-  //     GPGencryptor,
-  //     extention,
-  //     'gpg',
-  //     SOURCE_PATH,
-  //     TARGET_PATH,
-  //     (path, message) => {
-  //       assert.equal(message.slice(0, 33), "ENOENT: no such file or directory");
-  //       done();
-  //     }
-  //   )(MISSING_FILE);
-  // });
+    encryptFile(
+      GPGencryptor,
+      extention,
+      'gpg',
+      SOURCE_PATH,
+      TARGET_PATH,
+      (path, message) => {
+        assert.equal(message.slice(0, 33), "ENOENT: no such file or directory");
+        done();
+      }
+    )(MISSING_FILE);
+  });
 
   it("should encrypt a single file", function(done) {
     encryptFile(
@@ -148,5 +149,25 @@ describe("Testing encryption with GPG", function() {
       },
       true
     )(FILES[4]);
+  });
+
+  it('should encrypt the extra file in the missing folder', function(done) {
+    encryptFile(
+      GPGencryptor,
+      extention,
+      'gpg',
+      SOURCE_PATH,
+      TARGET_PATH,
+      (path, message) => {
+        fs.stat(path, (err, stats) => {
+          // if (stats !== undefined) assert.equal(stats.isFile(), true);
+          done();
+        });
+      }
+    )(EXTRA_FILE);
+  });
+
+  after(() => {
+    Fs.unlinkSync();
   });
 });
