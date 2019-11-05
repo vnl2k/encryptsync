@@ -115,7 +115,7 @@ describe("Testing encryption with GPG", function() {
         assert.equal(files.reduce((a, f) => a + fs.statSync(f).isFile(), 0), 5);
         done();
       })
-      .catch(err => console.log(err))
+      .catch(err => console.log(err));
   });
 
   it("should encrypt a single file in new-folder", function(done) {
@@ -160,14 +160,20 @@ describe("Testing encryption with GPG", function() {
       TARGET_PATH,
       (path, message) => {
         fs.stat(path, (err, stats) => {
-          // if (stats !== undefined) assert.equal(stats.isFile(), true);
+          if (stats !== undefined) assert.equal(stats.isFile(), true);
           done();
         });
       }
     )(EXTRA_FILE);
   });
 
-  after(() => {
-    Fs.unlinkSync();
+  after(function(done) {
+    fs.readdir('./tests/target', (err, files) => {
+      files.map( f => (/\.gpg/).test(f) ? fs.unlinkSync(`./tests/target/${f}`) : fs.rmdirSync(`./tests/target/${f}`, {recursive: true}));
+    });
+
+    setTimeout(() => {
+      done();
+    }, 50);
   });
 });
