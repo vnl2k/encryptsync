@@ -14,10 +14,11 @@ const GPGencryptor = encryptor(
 
 const SOURCE_PATH = Path.resolve("./tests/source"),
   TARGET_PATH = Path.resolve("./tests/target"),
-  resolver = name => Path.resolve("./tests/source/" + name),
+  resolver = name => SOURCE_PATH + '/' + name,
   FILES = [resolver("a.txt"), resolver("b.pdf"), resolver("c.txt"), resolver("d.doc"), resolver("new-folder/a.doc")],
   LARGE_FILE = resolver("large-file.txt"),
-  MISSING_FILE = resolver("noSuchFile.txt");
+  MISSING_FILE = resolver("noSuchFile.txt"),
+  EXTRA_FILE = resolver('missing-folder/extra-file.md');
 
 const futureEncryptFile = (f) => new Promise(
   (resolve, reject) => encryptFile(
@@ -114,7 +115,7 @@ describe("Testing encryption with GPG", function() {
         assert.equal(files.reduce((a, f) => a + fs.statSync(f).isFile(), 0), 5);
         done();
       })
-      .catch(err => console.log(err))
+      .catch(err => console.log(err));
   });
 
   it("should encrypt a single file in new-folder", function(done) {
@@ -148,5 +149,31 @@ describe("Testing encryption with GPG", function() {
       },
       true
     )(FILES[4]);
+  });
+
+  it('should encrypt the extra file in the missing folder', function(done) {
+    encryptFile(
+      GPGencryptor,
+      extention,
+      'gpg',
+      SOURCE_PATH,
+      TARGET_PATH,
+      (path, message) => {
+        fs.stat(path, (err, stats) => {
+          if (stats !== undefined) assert.equal(stats.isFile(), true);
+          done();
+        });
+      }
+    )(EXTRA_FILE);
+  });
+
+  after(function(done) {
+    fs.readdir('./tests/target', (err, files) => {
+      files.map( f => (/\.gpg/).test(f) ? fs.unlinkSync(`./tests/target/${f}`) : fs.rmdirSync(`./tests/target/${f}`, {recursive: true}));
+    });
+
+    setTimeout(() => {
+      done();
+    }, 50);
   });
 });

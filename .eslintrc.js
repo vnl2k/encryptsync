@@ -1,0 +1,33 @@
+module.exports = {
+    "env": {
+        "es6": true,
+        "node": true,
+        mocha: true
+    },
+    "extends": ["eslint:recommended", "plugin:mocha/recommended"],
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "rules": {
+        "indent": [
+            "error",
+            2,
+            { "SwitchCase": 1 }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ]
+    },
+    "plugins": [
+        "mocha"
+    ],
+};

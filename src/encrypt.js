@@ -38,24 +38,20 @@ function encryptFile(
       target_file = Path.resolve(Path.dirname(target_file), sha256Name(Path.basename(f)) + file_extention);
     }
 
-    // // check that the target file path exists
-    // let targetFilePath = Path.dirname(target_file);
-    // fsp
-    //   .stat(targetFilePath)
-    //   .catch( err => {
-    //     if (err !== undefined) {
-    //       fsp.mkdir(targetFilePath, {recursive: true})
-    //     }
-    //   })
+    // check that the target folder path exists
+    let targetFilePath = Path.dirname(target_file);
+    
+    const targetFolderCheck = fsp
+      .stat(targetFilePath)
+      .catch( () => {
+        // if the folder does NOT exist, create it
+        return fsp.mkdir(targetFilePath, {recursive: true});
+      });
 
-    // check the file exists
-    fs.stat(f, (err, stats) => {
-      if (err) {
-        callback(target_file, err.message);
-        return;
-      }
-
-      if (stats !== undefined && stats.isFile()) {
+    // check the file exists: fsp.stat(f)
+    Promise
+      .all([fsp.stat(f), targetFolderCheck])
+      .then( () => {
         switch (method) {
           case "gpg":
             encryptor(f, (stdin, stdout) => {
@@ -80,8 +76,43 @@ function encryptFile(
               });
             });
         }
-      }
-    });
+      })
+      .catch( err => callback(target_file, err.message) );
+
+    // // check the file exists
+    // fs.stat(f, (err, stats) => {
+    //   if (err) {
+    //     callback(target_file, err.message);
+    //     return;
+    //   }
+
+    //   if (stats !== undefined && stats.isFile()) {
+    //     switch (method) {
+    //       case "gpg":
+    //         encryptor(f, (stdin, stdout) => {
+    //           stdout
+    //             .on("close", () => callback(target_file, `Encrypted: ${relative_path}\n`))
+    //             .on("error", message => callback(target_file, message));
+
+    //           stdout.pipe(fs.createWriteStream(target_file));
+
+    //         });
+    //         break;
+
+    //       case "none":
+    //       default:
+    //         encryptor(f, encrypted_data => {
+    //           fs.writeFile(target_file, encrypted_data, err => {
+    //             if (err) {
+    //               callback(target_file, err.message);
+    //             } else {
+    //               callback(target_file, `Encrypted: ${relative_path}\n`);
+    //             }
+    //           });
+    //         });
+    //     }
+    //   }
+    // });
   };
 }
 
