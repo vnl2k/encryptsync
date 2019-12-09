@@ -1,6 +1,6 @@
 {
   "name": "encryptsync",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "The app monitors a folder for changes and encrypts with GPG chnaged files before moving them to the target folder.",
   "scripts": {
     "prettier": "prettier --loglevel error --use-tabs false --write \"**/*.js\"",
@@ -19,10 +19,12 @@
     "chokidar": "^2.0.4"
   },
   "devDependencies": {
-    "eslint": "^5.6.1",
     "eslint-plugin-mocha": "^6.2.1",
     "mocha": "^5.2.0",
-    "prettier": "^1.14.3"
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.19.1"
   },
   "engines": {
     "node": "^10"
