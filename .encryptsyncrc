@@ -2,7 +2,6 @@
 	"source_path": "./tests/source",
   "target_path": "./tests/target",
   "options": {
-  	"email" : "test@example.com",
-  	"method": "gpg"
+  	"email" : "test@example.com"
   }
 }
