@@ -19,22 +19,26 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/src/master/build/encryptsync_v0.2.9.zip)
 2. Unzip the archive.
 3. Run
-    ```bash
-        chmod +x /path/to/start-encryptsync
-        start-encryptsync --register-app
-    ```
-    The script with register the app with Ubuntu and add an executable for it in the Desktop folder.
+
+    `chmod +x /path/to/start-encryptsync`
+    
+    `start-encryptsync --register-app`
+
+    The script will register the app with Ubuntu and add an executable for it in Desktop folder.
+
 4. Configuration
-    The tool looks for `.encryptsyncrc` file in the home directory, i.e. `~/`. If that fails it searches for it in the repository folder. The file uses JSON format and looks like this:
-    ```json
-    {
-        "source_path": "/path/to/source/folder",
-        "target_path": "/path/to/target/folder",
-        "options": {
-            "email" : "email.address@for.gpg.key"
-        }
-    }
-    ```
+   The tool looks for `.encryptsyncrc` file in the home directory, i.e. `~/`. If that fails it searches for it in the repository folder. The file uses JSON format and looks like this:
+
+```
+{
+  "source_path": "/path/to/source/folder",
+  "target_path": "/path/to/target/folder",
+  "options": {
+     "email" : "email.address@for.gpg.key"
+  }
+}
+```
+    You need to edit accordingly the fields in it.
 
 ## Future work
 1. Allow the server to compare source and target folders when initialized:
