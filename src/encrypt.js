@@ -53,7 +53,7 @@ module.exports = {
       opsLogger = logMessage(log_path, 'info'),
       options = config.options;
 
-    opsLogger('Starting encryption monitor...');
+    opsLogger('Starting encryption monitor (v0.2.9)');
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger('To exit press: CTRL + C');
 
