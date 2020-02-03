@@ -40,7 +40,13 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 ```
     You need to edit accordingly the fields in it.
 
+### GPG encryption
+In order to generate a public-private key pair for GPG follow this [guide](https://www.gnupg.org/gph/en/manual.html#AEN26). It all begins with `gpg --gen-key` and the you follow the wizard.
+
+How-to guide from GitHub on creating new key pair is also available [here](https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
+
 ## Future work
+0. Add **CLI**/GUI allowing decryption of all or part of the data; possibly allow syncing encrypted files back.
 1. Allow the server to compare source and target folders when initialized:
     * one way of doing that would be to add a hash for each file to the encrypted file name?  
 2. Extend the tool to allow for the decryption of data as well, sync source and target folders in both directions.
