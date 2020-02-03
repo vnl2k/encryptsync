@@ -1,14 +1,43 @@
-# encryptsync (UNDER CONSTRUCTION)
-This package allows users to sync a _source_ folder with a _target_ one while encrypting the files in between using GPG or RSA. 
+# EncryptSync
+v0.2.9
 
-For instance _encryptsync_ allows users to encrypt a file  prior to copying it to a _Dropbox_ and _Google Drive_ folder.
+This package allows users to sync a _source_ folder with a _target_ one while encrypting the files using GNU Privacy Guard (GPG). The package does ***NOT*** implement any encryption layer itself!
 
-The package does NOT implement any security layer itself! It relies completely on established libraries for that.
+_EncryptSync_ watches the _source_ folder and whenever a file changes it encrypts the changed file using a public GPG key and saves in the _target_ folder. If the _target_ folder is _Dropbox_ and _Google Drive_, for instance, the encrypted version will be backed up in the cloud.
 
-The package has been tested only on Ubuntu and provides no guarantees.
+The package has been tested only on **Ubuntu** and provides no guarantees.
+
+## Limitations
+Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ will not decrypt it and save in the _source_ folder. Basically, the flow of data is only from source to target at the moment.
+
+## Dependencies
+* Node.js >= 12
+* [GPG](https://gnupg.org/)
+
+## Install
+1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/raw/f425f8e8ce760e2fa047925d112400c357f030fe/build/encryptsync_v0.2.9.zip)
+2. Unzip the archive.
+3. Run
+    ```bash
+        chmod +x /path/to/start-encryptsync
+        start-encryptsync --register-app
+    ```
+    The script with register the app with Ubuntu and add an executable for it in the Desktop folder.
+4. Configuration
+    The tool looks for `.encryptsyncrc` file in the home directory, i.e. `~/`. If that fails it searches for it in the repository folder. The file uses JSON format and looks like this:
+    ```json
+    {
+        "source_path": "/path/to/source/folder",
+        "target_path": "/path/to/target/folder",
+        "options": {
+            "email" : "email.address@for.gpg.key"
+        }
+    }
+    ```
 
 ## Future work
-1. Allow the server to compare source and target folders when initialized. 
+1. Allow the server to compare source and target folders when initialized:
+    * one way of doing that would be to add a hash for each file to the encrypted file name?  
 2. Extend the tool to allow for the decryption of data as well, sync source and target folders in both directions.
 3. Add support for the following encryption packages
     * https://gopenpgp.org/ (https://protonmail.com/blog/openpgp-golang/)
