@@ -14,8 +14,9 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 * Node.js >= 12
 * [GPG](https://gnupg.org/)
 
+
 ## Install
-1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/raw/f425f8e8ce760e2fa047925d112400c357f030fe/build/encryptsync_v0.2.9.zip)
+1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/src/master/build/encryptsync_v0.2.9.zip)
 2. Unzip the archive.
 3. Run
     ```bash
