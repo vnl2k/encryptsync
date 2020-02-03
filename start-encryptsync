@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Fix up .desktop Icon and Exec Paths, and update the .desktop file from the canonical version.
-cp encryptsync.desktop ../
-sed -i -e "s,^Icon=.*,Icon=$PWD/encryptsync.png,g" ../encryptsync.desktop
-sed -i -e "s,^Path=.*,Path=$PWD,g" ../encryptsync.desktop
-sed -i -e "s,^Exec=.*,Exec=node $PWD/index.js,g" ../encryptsync.desktop
-chmod +x ../encryptsync.desktop
+cp encryptsync.desktop.template ./encryptsync.desktop
+sed -i -e "s,^Icon=.*,Icon=$PWD/encryptsync.png,g" ./encryptsync.desktop
+sed -i -e "s,^Path=.*,Path=$PWD,g" ./encryptsync.desktop
+sed -i -e "s,^Exec=.*,Exec=node $PWD/index.js,g" ./encryptsync.desktop
+chmod +x ./encryptsync.desktop
 
 
 register_desktop_app=0
@@ -31,8 +31,8 @@ done
 
 if [ "$register_desktop_app" -eq 1 ]; then
 	mkdir -p "$HOME/.local/share/applications/"
-  cp ../encryptsync.desktop "$HOME/.local/share/applications/"
-	cp ../encryptsync.desktop "$HOME/Desktop"
+  cp ./encryptsync.desktop "$HOME/.local/share/applications/"
+	cp ./encryptsync.desktop "$HOME/Desktop"
 	update-desktop-database "$HOME/.local/share/applications/"
 	printf "Encrypt-Sync has been registered as a desktop app for this user in ~/.local/share/applications/\n"
 	exit 0

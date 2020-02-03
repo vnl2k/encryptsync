@@ -2,7 +2,7 @@
 Version=0.2.9
 Name=Encrypt-Sync
 Comment=testing desktop apps in Ubuntu
-Exec=node /encryptsync/src/index.js
+Exec=node /encryptsync/index.js
 Path=/encryptsync
 Icon=/encryptsync/encryptsync.png
 Terminal=true
