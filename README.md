@@ -11,7 +11,7 @@ The package has been tested only on **Ubuntu** and provides no guarantees.
 Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ will not decrypt it and save in the _source_ folder. Basically, the flow of data is only from source to target at the moment.
 
 ## Dependencies
-* Node.js >= 12
+* [Node.js](https://nodejs.org/en/download/) >= 12
 * [GPG](https://gnupg.org/)
 
 
