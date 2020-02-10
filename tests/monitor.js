@@ -30,23 +30,30 @@ let queue = new Stream.Duplex({
 });
 
 let encryptFileStub = () => file => {
-  queue.write(file);
   Fs.writeFileSync(TARGET_FILE, 'test: create file\n');
+  queue.write(file);
 
   return Promise.resolve('dummy path');
 };
 
-// initialize the monitor
-monitor('./.encryptsyncrc', encryptFileStub);
+let Watcher;
 
-describe('Testing encryption with GPG', function() {
-  it('should encrypt a new file', function(done) {
+describe('Testing monitoring', function() {
+  before(function(done) {
+    // initialize the monitor
+    Watcher = monitor('./.encryptsyncrc', encryptFileStub);
+
+    // it needs time to initialize the monitor
+    setTimeout(done, 150);
+  });
+
+  it('should detect a new file', function(done) {
     Fs.writeFileSync(SOURCE_FILE, 'test: create file\n');
 
     setTimeout(() => {
-      Assert.equal(Fs.existsSync(queue.read()), true);
+      Assert.equal(queue.read(), SOURCE_FILE);
       done();
-    }, 10);
+    }, 200);
   });
 
   it('should encrypt an updated file', function(done) {
@@ -60,14 +67,14 @@ describe('Testing encryption with GPG', function() {
 
   it('should sync a new folder', function(done) {
     Fsp.mkdir(NEW_FOLDER)
-      .then(new Promise((resolve) => setTimeout(() => resolve(), 150)))
+      .then(new Promise(resolve => setTimeout(() => resolve(), 450)))
       .then(() => Fsp.stat(NEW_TARGET_FOLDER))
       .then(stats => {
         Assert.equal(stats.isDirectory(), true);
         done();
       })
       .catch(err => {
-        console.log(err);
+        console.log('THIS MESSAGE SHOULD  not APPEAR!!!!');
         Assert.equal(err.errno, -2);
         done();
       });
@@ -83,28 +90,33 @@ describe('Testing encryption with GPG', function() {
         Assert.equal(err.errno, -2);
       }
       done();
-    }, 120);
+    }, 450);
   });
 
   it('should sync a deleted (empty in this case) folder', function(done) {
     Fsp.rmdir(NEW_FOLDER)
       .then(new Promise(resolve => setTimeout(() => resolve(), 140)))
       .then(() => Fsp.stat(NEW_TARGET_FOLDER))
-      .then(stats => console.log(stats))
+      .then(stats => {
+        console.log('THIS MESSAGE SHOULD  not APPEAR!!!!');
+        done();
+      })
       .catch(err => {
-        console.log(err)
         Assert.equal(err.errno, -2);
         done();
       });
   });
 
   // adds 200 ms delay between each test
-  afterEach(done => setTimeout(done, 200));
+  afterEach(function(done) {
+    setTimeout(done, 500);
+  });
 
-  after(done => {
+  after(function(done) {
+    Watcher.close();
     setTimeout(() => {
       done();
       process.exit(0);
-    }, 150);
+    }, 1000);
   });
 });

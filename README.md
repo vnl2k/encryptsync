@@ -20,9 +20,9 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 2. Unzip the archive.
 3. Run
 
-    `chmod +x /path/to/start-encryptsync`
+    `chmod u+x /path/to/install-encryptsync`
     
-    `start-encryptsync --register-app`
+    `./install-encryptsync --register-app`
 
     The script will register the app with Ubuntu and add an executable for it in Desktop folder.
 
@@ -33,12 +33,18 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 {
   "source_path": "/path/to/source/folder",
   "target_path": "/path/to/target/folder",
-  "options": {
-     "email" : "email.address@for.gpg.key"
-  }
+  "email" : "email.address@for.gpg.key"
 }
 ```
     You need to edit accordingly the fields in it.
+
+## Run in CLI mode
+In case you prefer running monitor using the command line there are two options:
+
+* specify the path for the configuration file: `./start-encryptsync --config /absolute/path/to/config`
+* specify the configuration information directly: `./start-encryptsync --target /absolute/path/to/target --source /absolute/path/to/source --email test@example.com`
+
+In the second case the logs file, _.encryptsyncLog_, will be located in the same folder as `start-encryptsync`. Otherwise it will be in the same folder as the configuration file.
 
 ### GPG encryption
 In order to generate a public-private key pair for GPG follow this [guide](https://www.gnupg.org/gph/en/manual.html#AEN26). It all begins with `gpg --gen-key` and the you follow the wizard.
@@ -46,10 +52,11 @@ In order to generate a public-private key pair for GPG follow this [guide](https
 How-to guide from GitHub on creating new key pair is also available [here](https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
 
 ## Future work
-0. Add **CLI**/GUI allowing decryption of all or part of the data; possibly allow syncing encrypted files back.
-1. Allow the server to compare source and target folders when initialized:
+0. Add wizard to generate the _rc_ config file.
+1. Add **CLI**/GUI allowing decryption of all or part of the data; possibly allow syncing encrypted files back.
+2. Allow the server to compare source and target folders when initialized:
     * one way of doing that would be to add a hash for each file to the encrypted file name?  
-2. Extend the tool to allow for the decryption of data as well, sync source and target folders in both directions.
-3. Add support for the following encryption packages
+3. Extend the tool to allow for the decryption of data as well, sync source and target folders in both directions.
+4. Add support for the following encryption packages
     * https://gopenpgp.org/ (https://protonmail.com/blog/openpgp-golang/)
     * https://www.pq-crystals.org/kyber (https://openquantumsafe.org/)

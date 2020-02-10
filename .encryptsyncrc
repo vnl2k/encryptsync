@@ -1,7 +1,5 @@
 {
-	"source_path": "./tests/source",
+  "source_path": "./tests/source",
   "target_path": "./tests/target",
-  "options": {
-  	"email" : "test@example.com"
-  }
+  "email" : "test@example.com"
 }
