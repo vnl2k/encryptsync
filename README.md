@@ -1,5 +1,5 @@
 # EncryptSync
-v0.2.9
+v0.2.10
 
 This package allows users to sync a _source_ folder with a _target_ one while encrypting the files using GNU Privacy Guard (GPG). The package does ***NOT*** implement any encryption layer itself!
 
@@ -16,7 +16,7 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 
 
 ## Install
-1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/src/master/build/encryptsync_v0.2.10.zip)
+1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/raw/098ff1fda5edede0e725e8cbca0a1dc8b3a09e77/build/encryptsync_v0.2.10.zip)
 2. Unzip the archive.
 3. Run
 
