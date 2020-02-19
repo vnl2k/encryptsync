@@ -63,7 +63,7 @@ module.exports = {
         email: config.email
       };
 
-    opsLogger('Starting encryption monitor (v0.2.9)');
+    opsLogger('Starting encryption monitor (v0.2.10)');
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger('To exit press: CTRL + C');
 
