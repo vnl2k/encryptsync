@@ -44,16 +44,26 @@ function encryptFile(encryptor, file_extention, source_path, target_path) {
 module.exports = {
   encryptFile,
 
-  monitor: (configPath, encryptFile) => {
-    const config = JSON.parse(fs.readFileSync(configPath)),
-      source_path = Path.resolve(config.source_path),
+  monitor: (configParam, encryptFile) => {
+    let config, log_path;
+
+    if (typeof configParam === 'string'){
+      config = JSON.parse(fs.readFileSync(configParam));
+      log_path = Path.join(Path.dirname(configParam), '.encryptsyncLog');
+    } else { // in-memory config
+      config = configParam;
+      log_path = Path.join(process.env.HOME, '.encryptsyncLog');
+    }
+    
+    const source_path = Path.resolve(config.source_path),
       target_path = Path.resolve(config.target_path),
-      log_path = Path.join(Path.dirname(configPath), '.encryptsyncLog'),
       errLogger = logMessage(log_path, 'error'),
       opsLogger = logMessage(log_path, 'info'),
-      options = config.options;
+      options = {
+        email: config.email
+      };
 
-    opsLogger('Starting encryption monitor (v0.2.9)');
+    opsLogger('Starting encryption monitor (v0.2.10)');
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger('To exit press: CTRL + C');
 
@@ -109,5 +119,7 @@ module.exports = {
       Watcher.close();
       process.exit(0);
     });
+
+    return Watcher;
   }
 };
