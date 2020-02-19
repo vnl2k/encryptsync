@@ -16,7 +16,7 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 
 
 ## Install
-1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/src/master/build/encryptsync_v0.2.9.zip)
+1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/src/master/build/encryptsync_v0.2.10.zip)
 2. Unzip the archive.
 3. Run
 
