@@ -1,0 +1,11 @@
+[Unit]
+Description = Starts the EncryptSync tool
+After = network.target
+
+[Service]
+User=nemo
+Group=nemo
+ExecStart = node /home/nemo/Documents/encryptsync/main.js
+
+[Install]
+WantedBy = multi-user.target
