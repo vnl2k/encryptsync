@@ -4,7 +4,7 @@ import * as fsp from "node:fs/promises";
 import * as Chokidar from "chokidar";
 
 import { ConfigI, LoggerI } from "./utils";
-import { GPGencryption as encryptorTemplate, GPGencryptionOptionsI, GPGEncryptor } from "./encryptors";
+import { GPGencryption as encryptorTemplate, GPGencryptionOptionsI, GPGEncryptor, toHash } from "./encryptors";
 import { ChildProcessWithoutNullStreams } from "node:child_process";
 
 const file_extention = ".gpg";
@@ -24,16 +24,19 @@ export function encryptFile(encryptor: GPGEncryptor, file_extention: string, sou
 
     // check the file exists: fsp.stat(f)
     return Promise.all([fsp.stat(f), targetFolderCheck]).then(() =>
-      encryptor(f).then(
-        (gpg) =>
-          new Promise<string>((resolve, reject: (reason: string) => void) => {
-            gpg.stderr.on("message", (message: string) => reject(`GPG std error: ${message}`));
-            gpg.on("error", (message: string) => reject(`GPG error: ${message}`));
-            gpg.stdout.on("close", () => resolve(target_file)).on("error", (message: string) => reject(message));
+      Promise.all([
+        encryptor(f).then(
+          (gpg) =>
+            new Promise<string>((resolve, reject: (reason: string) => void) => {
+              gpg.stderr.on("message", (message: string) => reject(`GPG std error: ${message}`));
+              gpg.on("error", (message: string) => reject(`GPG error: ${message}`));
+              gpg.stdout.on("close", () => resolve(target_file)).on("error", (message: string) => reject(message));
 
-            gpg.stdout.pipe(createWriteStream(target_file));
-          })
-      )
+              gpg.stdout.pipe(createWriteStream(target_file));
+            })
+        ),
+        toHash(f)
+      ])
     );
   };
 }
@@ -59,7 +62,7 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
 
     Watcher.on("add", (path: string) =>
       encryptor(path)
-        .then((enc_path) => opsLogger(`Encrypted: ${getRelativePath(enc_path, source_path)}\n`))
+        .then((enc_data) => opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`))
         .catch((err) => errLogger(err.message || err))
     )
       .on("addDir", (path: string) => {
@@ -68,7 +71,7 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
       })
       .on("change", (path: string) => {
         encryptor(path)
-          .then((enc_path) => opsLogger(`Encrypted: ${getRelativePath(enc_path, source_path)}\n`))
+          .then((enc_data) => opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`))
           .catch((err) => errLogger(err.message || err));
       })
       .on("unlink", (path: string) => {

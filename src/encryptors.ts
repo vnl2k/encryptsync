@@ -1,15 +1,26 @@
 import { ChildProcessWithoutNullStreams, spawn } from "node:child_process";
-// import { createReadStream } from "node:fs";
+import { createReadStream } from "node:fs";
 
-// import { createHash } from "node:crypto";
+import { createHash } from "node:crypto";
 
 // const openpgp = require("openpgp");
 
-// const toHash = (file: string) => {
-//   const hash = createHash("sha256");
-//   hash.update("some data to hash");
-//   return hash.digest("hex");
-// };
+export const toHash = (file: string) => {
+  return new Promise<string>((resolve, reject) => {
+    const hash = createHash("sha256");
+    const input = createReadStream(file);
+    input
+      .once("error", (err) => {
+        console.log(err)
+        reject("got it wrong")
+      })
+      .pipe(hash)
+      .setEncoding("hex")
+      .once("finish", () => {
+        resolve(hash.read());
+      });
+  });
+};
 
 export interface GPGencryptionOptionsI {
   email: string;
@@ -45,10 +56,3 @@ export function GPGencryption({ email }: GPGencryptionOptionsI) {
 //     // console.log(decrypted); // Uint8Array([0x01, 0x01, 0x01])
 //   };
 // }
-
-// module.exports = {
-//   GPGencryption: {
-//     encryptor: GPGencryption,
-//     extention: ".gpg",
-//   },
-// };
