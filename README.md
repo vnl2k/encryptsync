@@ -52,12 +52,10 @@ In order to generate a public-private key pair for GPG follow this [guide](https
 How-to guide from GitHub on creating new key pair is also available [here](https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
 
 ## Future work
-0. Use OpenPGP.js from Protonmail: https://openpgpjs.org/
 0. Add wizard to generate the _rc_ config file.
 1. Add **CLI**/GUI allowing decryption of all or part of the data; possibly allow syncing encrypted files back.
 2. Allow the server to compare source and target folders when initialized:
     * one way of doing that would be to add a hash for each file to the encrypted file name?  
 3. Extend the tool to allow for the decryption of data as well, sync source and target folders in both directions.
 4. Add support for the following encryption packages
-    * https://gopenpgp.org/ (https://protonmail.com/blog/openpgp-golang/)
     * https://www.pq-crystals.org/kyber (https://openquantumsafe.org/)

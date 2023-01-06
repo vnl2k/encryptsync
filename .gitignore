@@ -5,3 +5,5 @@
 *.cert
 *.pem
 *.encryptsyncLog
+*.yarn
+**/dist
