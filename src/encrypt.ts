@@ -49,7 +49,7 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
         email: config.email,
       };
 
-    opsLogger("Starting encryption monitor (v1.0.0)");
+    opsLogger("Starting encryption monitor (v1.0.1)");
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
