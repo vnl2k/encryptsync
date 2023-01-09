@@ -8,6 +8,7 @@ const KEY_LOOKUP: { [key: string]: string } = {
   "--source": "source_path",
   "--target": "target_path",
   email: "email",
+  "--logging": "logging",
 };
 
 function getKeyValuePair(key: string): [string, string] | undefined {
@@ -22,10 +23,11 @@ function getKeyValuePair(key: string): [string, string] | undefined {
 function resolveConfig() {
   let cli_config = getKeyValuePair("--config");
   const home_path = process.env.HOME;
-
+  
   const config_paths = [
     cli_config ? cli_config[1] : undefined,
     home_path !== undefined ? Path.join(home_path, ".encryptsyncrc") : undefined,
+    Path.join(process.cwd(), ".encryptsyncrc"),
     "./.encryptsyncrc",
   ].filter((i: string | undefined) => {
     if (i === undefined) return false;
@@ -40,7 +42,7 @@ function resolveConfig() {
 function getCliConfig(): ConfigI | undefined {
   const res = ["--target", "--source", "--email"].map((key) => getKeyValuePair(key)).filter((i) => i !== undefined);
 
-  if (res.length < 3) return;
+  if (res.length < 4) return;
 
   // @ts-ignore
   return res.reduce((o: ConfigI, i: [string, string]) => {
@@ -63,8 +65,8 @@ function main() {
     log_path = Path.join(process.cwd(), ".encryptsyncLog");
   }
 
-  const opsLogger = logMessage(log_path, "info", false);
-  const errLogger = logMessage(log_path, "error", false);
+  const opsLogger = logMessage(log_path, "info", config && config.logging === "console");
+  const errLogger = logMessage(log_path, "error", config && config.logging === "console");
 
   if (config !== undefined) {
     monitor(config, opsLogger, errLogger);

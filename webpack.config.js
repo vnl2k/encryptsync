@@ -13,7 +13,7 @@ module.exports = {
   target: 'node',
   mode: 'production',
   output: {
-    path: path.join(__dirname, 'build'),
+    path: path.join(__dirname, 'dist'),
     filename: 'main.js'
   },
   plugins: [...optionalPlugins]

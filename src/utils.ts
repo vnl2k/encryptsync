@@ -1,25 +1,20 @@
 import * as Fs from "node:fs";
 
-// const Chokidar = require("chokidar");
-
-// const Crypto = require("crypto"),
-//   Path = require("path"),
-//   Fs = require("fs"),
-//   FsPromise = require("fs").promises;
-
 export type LoggerI = (message: string) => void;
 
 export interface ConfigI {
   source_path: string;
   target_path: string;
   email: string;
+  logging: "file" | "console"
 }
 
 export const logMessage =
   (log_path: string, tags: string, toConsole = true) =>
   (message: string) => {
-    let fullMessage = `[${new Date().toLocaleTimeString()}] [${tags}] ${message}`;
+    let fullMessage = `[${new Date().toTimeString()}] [${tags}] ${message}`;
 
+    // outputs to the console log as well for debugging purposes
     if (toConsole === true) console.log(fullMessage);
 
     Fs.appendFile(log_path, fullMessage + "\n", "utf8", (err: any) => {
