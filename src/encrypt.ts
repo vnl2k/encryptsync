@@ -1,5 +1,5 @@
 import * as Path from "node:path";
-import { createWriteStream, mkdirSync, unlinkSync, rmdirSync } from "node:fs";
+import { createWriteStream, mkdirSync, unlinkSync, rmSync, exists, existsSync } from "node:fs";
 import * as fsp from "node:fs/promises";
 import * as Chokidar from "chokidar";
 
@@ -35,7 +35,7 @@ export function encryptFile(encryptor: GPGEncryptor, file_extention: string, sou
               gpg.stdout.pipe(createWriteStream(target_file));
             })
         ),
-        toHash(f)
+        toHash(f),
       ])
     );
   };
@@ -53,54 +53,68 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
-    const encryptor = encryptFile(encryptorTemplate(options), file_extention, source_path, target_path);
-    let Watcher = Chokidar.watch(source_path, {
-      ignoreInitial: true,
-      ignored: /(^|[/\\])\../,
-      persistent: true,
-    });
+    let does_not_exist = !existsSync(source_path);
+    let interval_id: any;
 
-    Watcher.on("add", (path: string) =>
-      encryptor(path)
-        .then((enc_data) => opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`))
-        .catch((err) => errLogger(err.message || err))
-    )
-      .on("addDir", (path: string) => {
-        mkdirSync(getTargetPath(path, source_path, target_path), { recursive: true });
-        opsLogger(`Added folder: ${getRelativePath(path, source_path)}\n`);
-      })
-      .on("change", (path: string) => {
-        encryptor(path)
-          .then((enc_data) => opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`))
-          .catch((err) => errLogger(err.message || err));
-      })
-      .on("unlink", (path: string) => {
-        unlinkSync(getTargetPath(path, source_path, target_path) + file_extention);
-        opsLogger(`Removed file: ${getRelativePath(path, source_path)}\n`);
-      })
-      .on("unlinkDir", (path: string) => {
-        rmdirSync(getTargetPath(path, source_path, target_path), { recursive: true });
-        opsLogger(`Removed folder: ${getRelativePath(path, source_path)}\n`);
-      });
+    const checkingFunc = () => {
+      does_not_exist = !existsSync(source_path);
+      if (!does_not_exist) {
+        clearInterval(interval_id);
+        const encryptor = encryptFile(encryptorTemplate(options), file_extention, source_path, target_path);
+        let Watcher = Chokidar.watch(source_path, {
+          ignoreInitial: true,
+          ignored: /(^|[/\\])\../,
+          persistent: true,
+        });
 
-    if (process.platform === "win32") {
-      var rl = require("readline").createInterface({
-        input: process.stdin,
-        output: process.stdout,
-      });
+        Watcher.on("add", (path: string) =>
+          encryptor(path)
+            .then((enc_data) =>
+              opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`)
+            )
+            .catch((err) => errLogger(err.message || err))
+        )
+          .on("addDir", (path: string) => {
+            mkdirSync(getTargetPath(path, source_path, target_path), { recursive: true });
+            opsLogger(`Added folder: ${getRelativePath(path, source_path)}\n`);
+          })
+          .on("change", (path: string) => {
+            encryptor(path)
+              .then((enc_data) =>
+                opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`)
+              )
+              .catch((err) => errLogger(err.message || err));
+          })
+          .on("unlink", (path: string) => {
+            unlinkSync(getTargetPath(path, source_path, target_path) + file_extention);
+            opsLogger(`Removed file: ${getRelativePath(path, source_path)}\n`);
+          })
+          .on("unlinkDir", (path: string) => {
+            rmSync(getTargetPath(path, source_path, target_path), { recursive: true });
+            opsLogger(`Removed folder: ${getRelativePath(path, source_path)}\n`);
+          })
+          .on("error", (error) => errLogger(`Watcher error: ${error}`));
 
-      rl.on("SIGINT", function () {
-        process.emit("SIGINT");
-      });
-    }
+        if (process.platform === "win32") {
+          var rl = require("readline").createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          });
 
-    process.on("SIGINT", function () {
-      opsLogger("\nGoodbye!");
-      Watcher.close();
-      process.exit(0);
-    });
+          rl.on("SIGINT", function () {
+            process.emit("SIGINT");
+          });
+        }
 
-    return Watcher;
+        process.on("SIGINT", function () {
+          opsLogger("\nGoodbye!");
+          Watcher.close();
+          process.exit(0);
+        });
+      }
+    };
+
+    interval_id = setInterval(checkingFunc, 2000);
   } catch (err: any) {
     errLogger(err);
     setTimeout(() => process.exit(1), 10);

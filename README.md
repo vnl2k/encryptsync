@@ -26,8 +26,11 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 
     The script will register the app with Ubuntu and add an executable for it in Desktop folder.
 
-4. Configuration
-   The tool looks for `.encryptsyncrc` file in the home directory, i.e. `~/`. If that fails it searches for it in the repository folder. The file uses JSON format and looks like this:
+4. Create a daemon
+    `sudo ln -sf /full/path/to/encrypt-sync.service /etc/systemd/system`
+
+5. Configuration
+   WIP: The tool looks for `.encryptsyncrc` file in the home directory, i.e. `~/`. If that fails it searches for it in the repository folder. The file uses JSON format and looks like this:
 
 ```
 {
