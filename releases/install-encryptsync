@@ -55,3 +55,5 @@ if [ "$register_desktop_app" -eq 1 ]; then
 	printf "Encrypt-Sync has been registered as a desktop app for this user in ~/.local/share/applications/\n"
 	exit 0
 fi
+
+sudo ln -sf /full/path/to/encrypt-sync.service /etc/systemd/system

@@ -1,6 +1,5 @@
 import * as Fs from "node:fs";
 import * as Path from "node:path";
-import * as sql from "sqlite3";
 import { randomUUID } from "node:crypto";
 
 export type LoggerI = (message: string) => void;
@@ -19,7 +18,6 @@ const __toMessage = (uuid: string, timestamp: string, tags: string, message: str
 export const logMessage =
   (log_path: string, tags: string, toConsole = true) =>
   (message: string) => {
-    const db_path = Path.join(Path.dirname(log_path), "encryptsyncDB.sqlite3");
 
     const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toTimeString(), tags, message);
 
@@ -29,35 +27,7 @@ export const logMessage =
     Fs.appendFile(log_path, fullMessage, "utf8", (err: any) => {
       if (err) throw err;
     });
-
-    // initSQLdb(db_path).then((db) => {
-    //   db.run(`INSERT INTO ChangeLog VALUES (?) (?) (?) (?)`, db_record)
-    // });
   };
-
-// function initSQLdb(db_path: string) {
-//   return new Promise<sql.Database>((resolve, reject) => {
-//     const db = new sql.Database(db_path, sql.OPEN_READWRITE, (err) => {
-//       if (err && err.name == "SQLITE_CANTOPEN") {
-//         db.run(`
-//           CREATE TABLE ChangeLog (
-//               UUID      VARCHAR (37) PRIMARY KEY,
-//               Timestamp DATETIME,
-//               Tag       VARCHAR (5),
-//               Message   TEXT
-//           );
-//         `, (err) => {
-//           if (err) reject()
-//             resolve(db)
-//         });
-//       } else if (err) {
-//         console.log("Getting error " + err);
-//         reject();
-//       }
-//       resolve(db);
-//     });
-//   });
-// }
 
 // // NOT IN USE ATM
 // function deleteGPGFiles(files) {
