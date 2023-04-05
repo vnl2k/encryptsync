@@ -4,9 +4,9 @@
   "description": "The app monitors a folder for changes and encrypts with GPG changed files before moving them to the target folder.",
   "scripts": {
     "dev": "tsc --watch --project ./tsconfig.json",
-    "dev-webpack": "webpack --config webpack.config.js --watch",
+    "dev-webpack-NOT-USE": "webpack --config webpack.config.js --watch",
     "test": "mocha $(find tests -name '*.js')",
-    "build": "tsc --project ./tsconfig.json; webpack --config webpack.config.js",
+    "build-NOT-USE": "tsc --project ./tsconfig.json; webpack --config webpack.config.js",
     "pkg": "pkg package.json --out-path ./dist"
   },
   "repository": {
@@ -38,7 +38,7 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"
   },
-  "bin": "dist/main.js",
+  "bin": "dist/index.js",
   "pkg": {
     "assets": [
       "node_modules/sqlite3/lib/binding/napi-v6-linux-glibc-x64/*.node"

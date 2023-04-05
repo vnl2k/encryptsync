@@ -16,5 +16,9 @@ module.exports = {
     path: path.join(__dirname, 'dist'),
     filename: 'main.js'
   },
-  plugins: [...optionalPlugins]
+  plugins: [...optionalPlugins],
+  externals: {
+    // declares sqlite3 as external module and stops webpack from trying to bundle it in
+    sqlite3: 'sqlite3'
+  }
 };
