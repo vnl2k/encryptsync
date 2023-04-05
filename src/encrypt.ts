@@ -4,8 +4,8 @@ import * as fsp from "node:fs/promises";
 import * as Chokidar from "chokidar";
 
 import { ConfigI, LoggerI } from "./utils";
-import { GPGencryption as encryptorTemplate, GPGencryptionOptionsI, GPGEncryptor, toHash } from "./encryptors";
-import { ChildProcessWithoutNullStreams } from "node:child_process";
+import { GPGencryption as encryptorTemplate, GPGEncryptor, toHash } from "./encryptors";
+// import { ChildProcessWithoutNullStreams } from "node:child_process";
 
 const file_extention = ".gpg";
 
@@ -53,12 +53,12 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
-    let does_not_exist = !existsSync(source_path);
+    let does_exist = false;
     let interval_id: any;
 
     const checkingFunc = () => {
-      does_not_exist = !existsSync(source_path);
-      if (!does_not_exist) {
+      does_exist = existsSync(source_path);
+      if (does_exist) {
         clearInterval(interval_id);
         const encryptor = encryptFile(encryptorTemplate(options), file_extention, source_path, target_path);
         let Watcher = Chokidar.watch(source_path, {

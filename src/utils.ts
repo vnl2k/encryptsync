@@ -1,6 +1,8 @@
 import * as Fs from "node:fs";
-import * as Path from "node:path";
+// import * as Path from "node:path";
+// import * as PouchDB from "pouchdb";
 import { randomUUID } from "node:crypto";
+import { Database as SQLite3Databse} from "sqlite3";
 
 export type LoggerI = (message: string) => void;
 
@@ -15,19 +17,37 @@ const __toMessage = (uuid: string, timestamp: string, tags: string, message: str
   return [`[${timestamp}] [${tags}] ${message}\n`, [uuid, timestamp, tags, message]];
 };
 
-export const logMessage =
-  (log_path: string, tags: string, toConsole = true) =>
-  (message: string) => {
+export const logMessage = (log_path: string, tags: string, toConsole = true) => {
+  // const db = initPouchDB();
+  const dbSQL = initSqlite3(log_path);
 
+  // this is already returning a function
+  return (message: string) => {
     const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toTimeString(), tags, message);
 
     // outputs to the console log as well for debugging purposes
     if (toConsole === true) console.log(fullMessage);
 
-    Fs.appendFile(log_path, fullMessage, "utf8", (err: any) => {
-      if (err) throw err;
-    });
+    // Fs.appendFile(log_path, fullMessage, "utf8", (err: any) => {
+    //   if (err) throw err;
+    // });
+
+    dbSQL.run("INSERT INTO tblLogs VALUES (?, ?, ?, ?)", db_record)
   };
+};
+
+// export const initPouchDB = () => {
+//   const db = new PouchDB("./dist/logs", { adapter: "leveldb" });
+//   // see https://pouchdb.com/api.html#create_database
+//   return db
+// };
+
+
+export const initSqlite3 = (db_path: string) => {
+  const db = new SQLite3Databse(db_path);
+  return db
+
+}
 
 // // NOT IN USE ATM
 // function deleteGPGFiles(files) {

@@ -7,3 +7,5 @@
 *.encryptsyncLog
 *.yarn
 **/dist
+
+*.db

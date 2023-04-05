@@ -59,10 +59,10 @@ function main() {
   const config_path = resolveConfig();
   if (config_path !== undefined) {
     config = JSON.parse(readFileSync(config_path, { encoding: "utf-8" }));
-    log_path = Path.join(Path.dirname(config_path), ".encryptsyncLog");
+    log_path = Path.join(Path.dirname(config_path), "encryptsync.db");
   } else {
     config = getCliConfig();
-    log_path = Path.join(process.cwd(), ".encryptsyncLog");
+    log_path = Path.join(process.cwd(), "encryptsync.db");
   }
 
   const opsLogger = logMessage(log_path, "info", config && config.logging === "console");
