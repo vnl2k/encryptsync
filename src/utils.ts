@@ -24,7 +24,7 @@ export const logMessage = (log_path: string, tags: string, toConsole = true) => 
 
   // this is already returning a function
   return (message: string) => {
-    const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toTimeString(), tags, message);
+    const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toISOString(), tags, message);
 
     // outputs to the console log as well for debugging purposes
     if (toConsole === true) {
