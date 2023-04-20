@@ -1,4 +1,5 @@
-import * as Fs from "node:fs";
+// import * as Fs from "node:fs";
+// import { stdout } from 'node:process';
 // import * as Path from "node:path";
 // import * as PouchDB from "pouchdb";
 import { randomUUID } from "node:crypto";
@@ -10,7 +11,7 @@ export interface ConfigI {
   source_path: string;
   target_path: string;
   email: string;
-  logging: "file" | "console";
+  logging: "db" | "debug";
 }
 
 const __toMessage = (uuid: string, timestamp: string, tags: string, message: string): [string, string[]] => {
@@ -26,7 +27,9 @@ export const logMessage = (log_path: string, tags: string, toConsole = true) => 
     const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toTimeString(), tags, message);
 
     // outputs to the console log as well for debugging purposes
-    if (toConsole === true) console.log(fullMessage);
+    if (toConsole === true) {
+      console.log(fullMessage);
+    }
 
     // Fs.appendFile(log_path, fullMessage, "utf8", (err: any) => {
     //   if (err) throw err;

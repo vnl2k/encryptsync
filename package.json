@@ -1,13 +1,13 @@
 {
   "name": "encryptsync",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The app monitors a folder for changes and encrypts with GPG changed files before moving them to the target folder.",
   "scripts": {
     "dev": "tsc --watch --project ./tsconfig.json",
     "dev-webpack-NOT-USE": "webpack --config webpack.config.js --watch",
     "test": "mocha $(find tests -name '*.js')",
     "build-NOT-USE": "tsc --project ./tsconfig.json; webpack --config webpack.config.js",
-    "pkg": "pkg package.json --out-path ./dist"
+    "pkg": "tsc --project ./tsconfig.json; pkg package.json --out-path ./dist"
   },
   "repository": {
     "type": "git",

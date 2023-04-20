@@ -65,8 +65,8 @@ function main() {
     log_path = Path.join(process.cwd(), "encryptsync.db");
   }
 
-  const opsLogger = logMessage(log_path, "info", config && config.logging === "console");
-  const errLogger = logMessage(log_path, "error", config && config.logging === "console");
+  const opsLogger = logMessage(log_path, "info", config && config.logging === "debug");
+  const errLogger = logMessage(log_path, "error", config && config.logging === "debug");
 
   if (config !== undefined) {
     monitor(config, opsLogger, errLogger);

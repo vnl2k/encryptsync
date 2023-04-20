@@ -14,6 +14,19 @@ Currently, if a an encrypted file changed in the _target_ folder _EncryptSync_ w
 * [Node.js](https://nodejs.org/en/download/) >= 18
 * [GPG](https://gnupg.org/)
 
+## Install as service with systemctl
+
+```bash
+sudo cp ./encrypt-sync.service /etc/systemd/system
+# or
+sudo ln -sf /FULL/PATH/TO/encrypt-sync.service /etc/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl start encrypt-sync.service
+
+# other options
+sudo systemctl restart encrypt-sync.service
+sudo systemctl stop encrypt-sync.service
+```
 
 ## Install
 1. Download the latest build from [here](https://bitbucket.org/vnl2k/encryptsync/raw/098ff1fda5edede0e725e8cbca0a1dc8b3a09e77/build/encryptsync_v0.2.10.zip)
