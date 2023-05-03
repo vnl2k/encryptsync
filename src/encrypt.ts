@@ -7,9 +7,15 @@ import { ConfigI, LoggerI } from "./utils";
 import { GPGencryption as encryptorTemplate, GPGEncryptor, toHash } from "./encryptors";
 // import { ChildProcessWithoutNullStreams } from "node:child_process";
 
+// interface PackageJONSI {
+//   version: string
+// }
+
+// const packagejson: PackageJONSI = JSON.parse(require("./package.json"))
+
 const file_extention = ".gpg";
 
-const getRelativePath = (file: string, source: string) => file.replace(source, "");
+// const getRelativePath = (file: string, source: string) => file.replace(source, "");
 const getTargetPath = (file: string, source: string, target: string) => file.replace(source, target);
 
 export function encryptFile(encryptor: GPGEncryptor, file_extention: string, source_path: string, target_path: string) {
@@ -49,7 +55,8 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
         email: config.email,
       };
 
-    opsLogger("Starting encryption monitor (v1.0.1)");
+    // opsLogger(`Starting encryption monitor (v${packagejson.version})`);
+    opsLogger("Starting encryption monitor");
     opsLogger(`Watching folder: ${source_path}`);
     opsLogger("To exit press: CTRL + C");
 
@@ -70,28 +77,41 @@ export const monitor = (config: ConfigI, opsLogger: LoggerI, errLogger: LoggerI)
         Watcher.on("add", (path: string) =>
           encryptor(path)
             .then((enc_data) =>
-              opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`)
+              opsLogger(`Encrypted: ${enc_data[0]} Hash: ${enc_data[1]}\n`, {
+                hash: enc_data[1],
+                type: "create",
+                path: enc_data[0]
+              })
             )
             .catch((err) => errLogger(err.message || err))
         )
           .on("addDir", (path: string) => {
             mkdirSync(getTargetPath(path, source_path, target_path), { recursive: true });
-            opsLogger(`Added folder: ${getRelativePath(path, source_path)}\n`);
+            opsLogger(`Added folder: ${path}\n`);
           })
           .on("change", (path: string) => {
             encryptor(path)
               .then((enc_data) =>
-                opsLogger(`Encrypted: ${getRelativePath(enc_data[0], source_path)} Hash: ${enc_data[1]}\n`)
+                opsLogger(`Encrypted: ${enc_data[0]} Hash: ${enc_data[1]}\n`, {
+                hash: enc_data[1],
+                type: "update",
+                // path: getRelativePath(enc_data[0], source_path)
+                path: enc_data[0]
+              })
               )
               .catch((err) => errLogger(err.message || err));
           })
           .on("unlink", (path: string) => {
             unlinkSync(getTargetPath(path, source_path, target_path) + file_extention);
-            opsLogger(`Removed file: ${getRelativePath(path, source_path)}\n`);
+            opsLogger(`Removed file: ${path}\n`, {
+                type: "delete",
+                path: getTargetPath(path, source_path, target_path) + file_extention,
+                hash: undefined
+              });
           })
           .on("unlinkDir", (path: string) => {
             rmSync(getTargetPath(path, source_path, target_path), { recursive: true });
-            opsLogger(`Removed folder: ${getRelativePath(path, source_path)}\n`);
+            opsLogger(`Removed folder: ${path}\n`);
           })
           .on("error", (error) => errLogger(`Watcher error: ${error}`));
 

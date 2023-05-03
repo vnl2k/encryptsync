@@ -1,17 +1,44 @@
-// import * as Fs from "node:fs";
+import * as Fs from "node:fs";
 // import { stdout } from 'node:process';
 // import * as Path from "node:path";
 // import * as PouchDB from "pouchdb";
 import { randomUUID } from "node:crypto";
-import { Database as SQLite3Databse} from "sqlite3";
+// import { Interface } from "node:readline";
+import { Database as SQLite3Databse } from "sqlite3";
 
-export type LoggerI = (message: string) => void;
+export type LoggerI = (message: string, context?: LogContext | LogContextDelete | null) => void;
 
 export interface ConfigI {
   source_path: string;
   target_path: string;
   email: string;
   logging: "db" | "debug";
+}
+
+export interface LogContext {
+  hash: string;
+  path: string;
+  type: "create" | "update" | "delete";
+}
+
+export interface LogContextDelete {
+  hash: undefined;
+  path: string;
+  type: "delete";
+}
+
+// this is a fallback option in case SQLite3 is not available on the system
+class FileLogger {
+  logfile: string;
+  constructor(logfile_path: string) {
+    this.logfile = logfile_path;
+  }
+
+  run(_: string, fullMessage: string[]) {
+    Fs.appendFile(this.logfile, fullMessage.toString(), "utf8", (err: any) => {
+      if (err) throw err;
+    });
+  }
 }
 
 const __toMessage = (uuid: string, timestamp: string, tags: string, message: string): [string, string[]] => {
@@ -22,21 +49,38 @@ export const logMessage = (log_path: string, tags: string, toConsole = true) => 
   // const db = initPouchDB();
   const dbSQL = initSqlite3(log_path);
 
-  // this is already returning a function
-  return (message: string) => {
-    const [fullMessage, db_record] = __toMessage(randomUUID(), new Date().toISOString(), tags, message);
+  // this returns a function
+  return (message: string, context: LogContext | LogContextDelete | null = null) => {
+    const timestamp = new Date().toISOString();
+    const uuid = randomUUID();
+    const [fullMessage, log_record] = __toMessage(uuid, timestamp, tags, message);
 
     // outputs to the console log as well for debugging purposes
     if (toConsole === true) {
       console.log(fullMessage);
     }
 
-    // Fs.appendFile(log_path, fullMessage, "utf8", (err: any) => {
-    //   if (err) throw err;
-    // });
-
-    dbSQL.run("INSERT INTO tblLogs VALUES (?, ?, ?, ?)", db_record)
+    if (context !== null) {
+      dbSQL.run("INSERT INTO tblActivity VALUES (?, ?, ?, ?, ?)", [
+        context?.path || "",
+        context.type,
+        timestamp,
+        uuid,
+        context?.hash || "",
+      ]);
+    } else {
+      dbSQL.run("INSERT INTO tblLogs VALUES (?, ?, ?, ?)", log_record)
+    }
   };
+};
+
+export const initSqlite3 = (db_path: string) => {
+  try {
+    const db = new SQLite3Databse(db_path);
+    return db;
+  } catch {
+    return new FileLogger(db_path);
+  }
 };
 
 // export const initPouchDB = () => {
@@ -44,13 +88,6 @@ export const logMessage = (log_path: string, tags: string, toConsole = true) => 
 //   // see https://pouchdb.com/api.html#create_database
 //   return db
 // };
-
-
-export const initSqlite3 = (db_path: string) => {
-  const db = new SQLite3Databse(db_path);
-  return db
-
-}
 
 // // NOT IN USE ATM
 // function deleteGPGFiles(files) {
